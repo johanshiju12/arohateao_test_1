@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Aroha Te Ao — Grade Tracker</title>
+<style>
+:root {
+  --primary: #1a3f6b;
+  --primary-light: #e8f0ee;
+  --primary-dark: #0a1e3d;
+  --gold: #c8a94e;
+  --gold-light: #faf3dd;
+  --cream: #edf2f8;
+  --white: #ffffff;
+  --border: #d0d8e4;
+  --text: #1a1e2a;
+  --text-muted: #6a7080;
+  --red: #c44536;
+  --red-light: #fce8e6;
+  --green: #3d8b37;
+  --green-light: #e6f4e5;
+  --blue: #2c6fba;
+  --blue-light: #e3edf8;
+  --amber: #b8860b;
+  --amber-light: #fef3d0;
+  --gray: #9e9a92;
+  --gray-light: #e4e9f0;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+#app {
+  display: flex;
+  min-height: 100vh;
+}
+
+#app.no-selection #sidebar {
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+#app.no-selection #main {
+  display: none;
+}
+
+/* SIDEBAR */
+#sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: linear-gradient(180deg, #061428 0%, var(--primary-dark) 40%, #0a1e3d 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  transition: width 0.3s ease, min-width 0.3s ease;
+}
+
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 2px;
+}
+
+.sidebar-header .subtitle {
+  font-size: 12px;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.sidebar-search {
+  padding: 12px 16px;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sidebar-search input::placeholder { color: rgba(255,255,255,0.35); }
+.sidebar-search input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.12); }
+
+.student-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+#app.no-selection .student-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  padding: 12px 24px;
+}
+
+.student-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+}
+
+.student-item:hover { background: rgba(255,255,255,0.08); }
+.student-item.active { background: rgba(255,255,255,0.14); }
+
+.student-item .name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.student-item .gpa-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  white-space: nowrap;
+}
+
+.sidebar-actions {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-sidebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-add-student {
+  background: var(--gold);
+  color: var(--primary-dark);
+}
+.btn-add-student:hover { background: #d4b65a; }
+
+.btn-compare {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-compare:hover { background: rgba(255,255,255,0.18); }
+.btn-compare.active { background: rgba(255,255,255,0.2); border-color: var(--gold); }
+
+/* MAIN CONTENT */
+#main {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 40px 80px;
+}
+
+/* WELCOME SCREEN */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+}
+
+.welcome h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.welcome p {
+  color: var(--text-muted);
+  font-size: 15px;
+  max-width: 400px;
+}
+
+/* STUDENT DETAIL */
+.student-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.student-name-area {
+  flex: 1;
+}
+
+.student-name-area h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-name-area h2 .edit-name-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.3;
+  transition: opacity 0.15s;
+}
+
+.student-name-area h2 .edit-name-btn:hover { opacity: 0.7; }
+
+.student-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-danger {
+  background: var(--red-light);
+  color: var(--red);
+  border: 1px solid rgba(196,69,54,0.15);
+}
+.btn-danger:hover { background: #f8d5d1; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--gray-light); }
+
+/* STATS CARDS */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+}
+
+.stat-card .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.stat-card .value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.stat-card .value.gpa { color: var(--primary); }
+.stat-card .detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* SUBJECT SECTIONS */
+.subject-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.subject-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.subject-header:hover { background: var(--cream); }
+
+.subject-header .chevron {
+  font-size: 12px;
+  margin-right: 12px;
+  transition: transform 0.2s;
+  color: var(--text-muted);
+}
+
+.subject-header.open .chevron { transform: rotate(90deg); }
+
+.subject-header .subject-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.subject-header .subject-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.subject-header .subject-stats span { white-space: nowrap; }
+.subject-header .subject-stats strong { color: var(--text); font-weight: 600; }
+
+.subject-header .remove-subject {
+  margin-left: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  padding: 4px;
+}
+
+.subject-header:hover .remove-subject { opacity: 1; }
+.subject-header .remove-subject:hover { color: var(--red); }
+
+.subject-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+
+.subject-body.open { display: block; }
+
+/* STANDARDS TABLE */
+.standards-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.standards-table th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.standards-table td {
+  padding: 10px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid #e4e9f0;
+  vertical-align: middle;
+}
+
+.standards-table tr:last-child td { border-bottom: none; }
+
+.standards-table .code {
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+  width: 100px;
+}
+
+.standards-table .std-name { min-width: 200px; }
+.standards-table .credits { text-align: center; width: 70px; font-weight: 600; }
+
+/* GRADE SELECT */
+.grade-select, .status-select {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%239e9a92'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 22px;
+}
+
+.grade-select:focus, .status-select:focus { border-color: var(--primary); }
+
+.grade-select { width: 110px; }
+.status-select { width: 150px; }
+
+.grade-select.grade-none { background-color: var(--white); color: var(--gray); }
+.grade-select.grade-na { background-color: var(--red-light); color: var(--red); }
+.grade-select.grade-a { background-color: var(--green-light); color: var(--green); }
+.grade-select.grade-m { background-color: var(--blue-light); color: var(--blue); }
+.grade-select.grade-e { background-color: var(--gold-light); color: var(--amber); }
+
+.status-select.status-not-started { background-color: var(--white); color: var(--gray); }
+.status-select.status-started { background-color: var(--blue-light); color: var(--blue); }
+.status-select.status-pending { background-color: var(--amber-light); color: var(--amber); }
+.status-select.status-received { background-color: var(--green-light); color: var(--green); }
+.status-select.status-failed { background-color: var(--red-light); color: var(--red); }
+.status-select.status-derived { background-color: #e8e0f4; color: #6b4fa0; }
+
+/* COMPARE VIEW */
+.compare-header {
+  margin-bottom: 24px;
+}
+
+.compare-header h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--primary-dark);
+}
+
+.compare-header p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.compare-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.compare-table-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.compare-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.compare-table th:hover { color: var(--primary); }
+.compare-table th.sorted { color: var(--primary); }
+.compare-table th .sort-arrow { margin-left: 4px; font-size: 9px; }
+
+.compare-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid #e4e9f0;
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: var(--cream); }
+
+.compare-table .student-name-cell {
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--primary);
+}
+.compare-table .student-name-cell:hover { text-decoration: underline; }
+
+.gpa-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gpa-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--gray-light);
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 120px;
+}
+
+.gpa-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.chart-container {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 28px;
+}
+
+.chart-container h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: clamp(200px, 30vh, 360px);
+}
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  width: 90%;
+  max-width: 440px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 20px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-body { padding: 16px 24px 24px; }
+
+.modal-body input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.modal-body input[type="text"]:focus { border-color: var(--primary); }
+
+.modal-body .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.subject-pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.subject-pick-item {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.subject-pick-item:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.subject-pick-item .std-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.no-subjects-msg {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-compare {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-compare h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* GRADE DISTRIBUTION DOTS */
+.grade-dist {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.grade-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.grade-dot.na { background: var(--red-light); color: var(--red); }
+.grade-dot.a { background: var(--green-light); color: var(--green); }
+.grade-dot.m { background: var(--blue-light); color: var(--blue); }
+.grade-dot.e { background: var(--gold-light); color: var(--amber); }
+
+/* PRINT STYLES */
+@media print {
+  #sidebar { display: none; }
+  #main { padding: 20px; }
+  .btn, .student-actions, .sidebar-actions, .modal-overlay { display: none !important; }
+  .subject-body { display: block !important; }
+  .subject-section { break-inside: avoid; }
+  .stats-row { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* SCROLLBAR */
+.student-list::-webkit-scrollbar { width: 4px; }
+.student-list::-webkit-scrollbar-track { background: transparent; }
+.student-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .compare-stats { grid-template-columns: repeat(2, 1fr); }
+  #main { padding: 24px 20px 80px; }
+}
+
+@media (max-width: 700px) {
+  #sidebar { width: 240px; min-width: 240px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:6px;font-size:11px;opacity:0.6;margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;font-family:var(--font-body)">&#8592; Aroha Te Ao</a>
+      <h1>Grade Tracker</h1>
+      <div class="subtitle">NCEA Management</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;opacity:0.25"><span style="width:28px;height:1px;background:#c8a94e"></span><span style="width:4px;height:4px;background:#c8a94e;transform:rotate(45deg)"></span><span style="width:28px;height:1px;background:#c8a94e"></span></div>
+    </div>
+    <div class="sidebar-search">
+      <input type="text" id="studentSearch" placeholder="Search students…" autocomplete="off">
+      <select id="sidebarSort" style="width:100%;padding:7px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;background:rgba(255,255,255,0.08);color:#fff;font-size:12px;outline:none;margin-top:6px;-webkit-appearance:none;appearance:none;cursor:pointer">
+        <option value="name" style="color:#000">Sort: Name A-Z</option>
+        <option value="gpa-desc" style="color:#000">Sort: GPA (highest)</option>
+        <option value="gpa-asc" style="color:#000">Sort: GPA (lowest)</option>
+        <option value="rank-desc" style="color:#000">Sort: Rank Score (highest)</option>
+        <option value="credits-desc" style="color:#000">Sort: Credits Earned</option>
+      </select>
+    </div>
+    <div class="student-list" id="studentList"></div>
+    <div class="sidebar-actions">
+      <button class="btn-sidebar btn-add-student" id="btnAddStudent" style="display:none">+ Add Student</button>
+      <button class="btn-sidebar btn-compare" id="btnCompare">Compare All Students</button>
+      <button class="btn-sidebar btn-admin" id="btnAdmin" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1)">🔒 Admin Mode</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://artifactcdn.diabrowser.engineering/ajax/libs/Chart.js/chart.umd.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// ==========================================
+// SUBJECT TEMPLATES
+// Add your NCEA subjects and standards here.
+// Each key is a subject name, and the value
+// is an array of standard objects.
+// ==========================================
+const SUBJECT_TEMPLATES = {
+  "English": [
+    { code: "AS91098", name: "Analyse specified aspect(s) of studied written text(s), supported by evidence", credits: 4, type: "External" },
+    { code: "AS91099", name: "Analyse specified aspect(s) of studied visual or oral text(s), supported by evidence", credits: 4, type: "External" },
+    { code: "AS91101", name: "Produce a selection of crafted and controlled writing", credits: 6, type: "Internal" },
+    { code: "AS91104", name: "Analyse significant connections across texts, supported by evidence", credits: 4, type: "Internal" },
+  ],
+  "Mathematics": [
+    { code: "AS91259", name: "Apply trigonometric relationships in solving problems", credits: 3, type: "Internal" },
+    { code: "AS91261", name: "Apply algebraic methods in solving problems", credits: 4, type: "External" },
+    { code: "AS91262", name: "Apply calculus methods in solving problems", credits: 5, type: "External" },
+    { code: "AS91264", name: "Use statistical methods to make an inference", credits: 4, type: "Internal" },
+  ],
+  "Physics": [
+    { code: "AS91168", name: "Carry out a practical physics investigation that leads to a non-linear mathematical relationship", credits: 4, type: "Internal" },
+    { code: "AS91170", name: "Demonstrate understanding of waves", credits: 4, type: "External" },
+    { code: "AS91172", name: "Demonstrate understanding of atomic and nuclear physics", credits: 3, type: "Internal" },
+    { code: "AS91172", name: "Standard 2.4 (check: may be AS91171 Mechanics)", credits: 6, type: "External" },
+  ],
+  "Religious Studies": [
+    { code: "AS91724", name: "Analyse the response of a religious tradition to a contemporary ethical issue", credits: 6, type: "Internal" },
+    { code: "AS90822", name: "Describe the key beliefs of a religious tradition and their importance to adherents", credits: 6, type: "Internal" },
+    { code: "AS90823", name: "Explain how a contemporary social action derives from teachings and beliefs of a religious tradition", credits: 6, type: "Internal" },
+  ],
+  "Health": [
+    { code: "US33142", name: "Health Standard (Unit Standard)", credits: 4, type: "Internal" },
+  ],
+  "Chemistry": [
+    { code: "AS91163", name: "Demonstrate understanding of the chemistry used in the development of a current technology", credits: 3, type: "Internal" },
+    { code: "AS91164", name: "Demonstrate understanding of bonding, structure, properties and energy changes", credits: 5, type: "External" },
+    { code: "AS91166", name: "Demonstrate understanding of chemical reactivity", credits: 4, type: "External" },
+    { code: "AS91167", name: "Demonstrate understanding of oxidation-reduction", credits: 3, type: "Internal" },
+  ],
+  "Biology": [
+    { code: "AS91153", name: "Carry out a practical investigation in a biology context, with supervision", credits: 4, type: "Internal" },
+    { code: "AS91156", name: "Demonstrate understanding of life processes at the cellular level", credits: 4, type: "External" },
+    { code: "AS91158", name: "Investigate a pattern in an ecological community, with supervision", credits: 4, type: "Internal" },
+    { code: "AS91159", name: "Demonstrate understanding of gene expression", credits: 4, type: "External" },
+  ],
+  "Commerce": [
+    { code: "AS90847", name: "Standard 2.5 (Commerce)", credits: 3, type: "Internal" },
+    { code: "AS91222", name: "Standard 2.1 (Commerce)", credits: 4, type: "Internal" },
+    { code: "AS91224", name: "Standard 2.3 (Commerce)", credits: 4, type: "External" },
+    { code: "AS91177", name: "Standard 2.4 (Commerce)", credits: 4, type: "Internal" },
+    { code: "AS91868", name: "Standard 2.10 (Commerce)", credits: 4, type: "Internal" },
+  ],
+  "History": [
+    { code: "AS91229", name: "Carry out an inquiry of an historical event or place that is of significance to New Zealanders", credits: 4, type: "Internal" },
+    { code: "AS91230", name: "Examine an historical event or place that is of significance to New Zealanders", credits: 5, type: "Internal" },
+    { code: "AS91232", name: "Interpret different perspectives of people in an historical event of significance to New Zealanders", credits: 5, type: "Internal" },
+    { code: "AS91233", name: "Examine causes and consequences of a significant historical event", credits: 5, type: "External" },
+  ],
+  "Digital Technology": [
+    { code: "AS91896", name: "Standard 2.7 (Digital Technology)", credits: 6, type: "Internal" },
+    { code: "US18740", name: "Unit Standard (Digital Technology)", credits: 3, type: "Internal" },
+    { code: "AS91356", name: "Standard 2.3 (Digital Technology)", credits: 6, type: "Internal" },
+    { code: "AS91893", name: "Standard 2.4 (Digital Technology)", credits: 4, type: "Internal" },
+    { code: "US29770", name: "Unit Standard (Digital Technology)", credits: 4, type: "Internal" },
+  ],
+  "DVC": [
+    { code: "AS91341", name: "Develop a spatial design through graphics practice", credits: 6, type: "External" },
+    { code: "AS91342", name: "Develop a product design through graphics practice", credits: 6, type: "External" },
+    { code: "AS91343", name: "Use visual communication techniques to generate design ideas", credits: 4, type: "Internal" },
+  ],
+  "Media Studies": [
+    { code: "AS91250", name: "Demonstrate understanding of representation in the media", credits: 3, type: "Internal" },
+    { code: "AS91251", name: "Demonstrate understanding of an aspect of a media genre", credits: 4, type: "External" },
+    { code: "AS91252", name: "Produce a design and plan for a developed media product using a range of conventions", credits: 4, type: "Internal" },
+    { code: "AS91253", name: "Complete a developed media product from a design and plan using conventions", credits: 6, type: "Internal" },
+    { code: "AS91255", name: "Standard 2.8 (Media Studies)", credits: 3, type: "External" },
+  ],
+};
+
+// ==========================================
+// STATE
+// ==========================================
+const GRADE_VALUES = { na: 0, a: 2, m: 3, e: 4 };
+const GRADE_LABELS = { na: 'Not Achieved', a: 'Achieved', m: 'Merit', e: 'Excellence' };
+const STATUS_LABELS = {
+  'not-started': 'Not Started',
+  'started': 'Started',
+  'pending': 'Pending',
+  'received': 'Received Credits',
+  'failed': 'Failed'
+};
+
+let state = {
+  students: [],
+  activeStudentId: null,
+  view: 'detail',
+  compareSort: { key: 'name', dir: 'asc' },
+  openSubjects: {}
+};
+
+let compareChart = null;
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+function saveState() {
+  localStorage.setItem('ncea_tracker', JSON.stringify({
+    students: state.students,
+    openSubjects: state.openSubjects
+  }));
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('ncea_tracker');
+    if (raw) {
+      const data = JSON.parse(raw);
+      state.students = data.students || [];
+      state.openSubjects = data.openSubjects || {};
+    }
+  } catch(e) { /* ignore */ }
+}
+
+// ==========================================
+// DATA OPERATIONS
+// ==========================================
+function addStudent(name) {
+  const student = { id: uid(), name: name.trim(), subjects: [] };
+  state.students.push(student);
+  state.activeStudentId = student.id;
+  state.view = 'detail';
+  saveState();
+  render();
+}
+
+function deleteStudent(id) {
+  state.students = state.students.filter(s => s.id !== id);
+  if (state.activeStudentId === id) {
+    state.activeStudentId = state.students.length ? state.students[0].id : null;
+  }
+  saveState();
+  render();
+}
+
+function renameStudent(id, name) {
+  const s = state.students.find(s => s.id === id);
+  if (s) { s.name = name.trim(); saveState(); render(); }
+}
+
+function addSubjectToStudent(studentId, templateKey) {
+  const student = state.students.find(s => s.id === studentId);
+  if (!student) return;
+  const template = SUBJECT_TEMPLATES[templateKey];
+  if (!template) return;
+  if (student.subjects.find(s => s.templateKey === templateKey)) return;
+  const subjectId = uid();
+  student.subjects.push({
+    id: subjectId,
+    templateKey,
+    name: templateKey,
+    standards: template.map(t => ({
+      code: t.code,
+      name: t.name,
+      credits: t.credits,
+      type: t.type || '',
+      grade: null,
+      status: 'not-started'
+    }))
+  });
+  state.openSubjects[subjectId] = true;
+  saveState();
+  render();
+}
+
+function removeSubject(studentId, subjectId) {
+  const student = state.students.find(s => s.id === studentId);
+  if (!student) return;
+  student.subjects = student.subjects.filter(s => s.id !== subjectId);
+  saveState();
+  render();
+}
+
+function updateGrade(studentId, subjectId, stdIdx, grade) {
+  const student = state.students.find(s => s.id === studentId);
+  if (!student) return;
+  const subject = student.subjects.find(s => s.id === subjectId);
+  if (!subject) return;
+  subject.standards[stdIdx].grade = grade || null;
+  saveState();
+  renderMain();
+  renderSidebar();
+}
+
+function updateStatus(studentId, subjectId, stdIdx, status) {
+  const student = state.students.find(s => s.id === studentId);
+  if (!student) return;
+  const subject = student.subjects.find(s => s.id === subjectId);
+  if (!subject) return;
+  subject.standards[stdIdx].status = status;
+  saveState();
+  renderMain();
+}
+
+// ==========================================
+// CALCULATIONS
+// ==========================================
+function calcSubjectStats(subject) {
+  let totalCredits = 0, gradedCredits = 0, earnedCredits = 0;
+  let weightedSum = 0, graded = 0;
+  const dist = { na: 0, a: 0, m: 0, e: 0 };
+
+  subject.standards.forEach(std => {
+    totalCredits += std.credits;
+    if (std.grade) {
+      gradedCredits += std.credits;
+      weightedSum += GRADE_VALUES[std.grade] * std.credits;
+      graded++;
+      dist[std.grade]++;
+      if (std.grade !== 'na') earnedCredits += std.credits;
+    }
+  });
+
+  return {
+    totalCredits,
+    gradedCredits,
+    earnedCredits,
+    gpa: gradedCredits > 0 ? (weightedSum / gradedCredits) : null,
+    totalStandards: subject.standards.length,
+    gradedStandards: graded,
+    dist
+  };
+}
+
+function calcStudentStats(student) {
+  let totalCredits = 0, gradedCredits = 0, earnedCredits = 0;
+  let weightedSum = 0, rankScore = 0, graded = 0;
+  const dist = { na: 0, a: 0, m: 0, e: 0 };
+
+  student.subjects.forEach(subj => {
+    subj.standards.forEach(std => {
+      const isDerived = std.status === 'derived';
+      if (!isDerived) totalCredits += std.credits;
+      if (std.grade) {
+        gradedCredits += std.credits;
+        weightedSum += GRADE_VALUES[std.grade] * std.credits;
+        graded++;
+        dist[std.grade]++;
+        if (!isDerived) {
+          if (std.grade !== 'na') earnedCredits += std.credits;
+          rankScore += GRADE_VALUES[std.grade] * std.credits;
+        }
+      }
+    });
+  });
+
+  return {
+    totalCredits,
+    gradedCredits,
+    earnedCredits,
+    gpa: gradedCredits > 0 ? (weightedSum / gradedCredits) : null,
+    rankScore: rankScore,
+    gradedStandards: graded,
+    totalStandards: student.subjects.reduce((n, s) => n + s.standards.length, 0),
+    dist,
+    excellenceRate: graded > 0 ? (dist.e / graded * 100) : 0,
+    meritPlusRate: graded > 0 ? ((dist.e + dist.m) / graded * 100) : 0,
+    completionRate: totalCredits > 0 ? (earnedCredits / totalCredits * 100) : 0
+  };
+}
+
+function fmtGPA(gpa) { return gpa !== null ? gpa.toFixed(2) : '—'; }
+
+function gpaColor(gpa) {
+  if (gpa === null) return '#9e9a92';
+  if (gpa >= 3.5) return '#b8860b';
+  if (gpa >= 2.5) return '#2c6fba';
+  if (gpa >= 1.5) return '#3d8b37';
+  return '#c44536';
+}
+
+// ==========================================
+// RENDERING
+// ==========================================
+function render() {
+  const app = document.getElementById('app');
+  if (!state.activeStudentId && state.view !== 'compare') {
+    app.classList.add('no-selection');
+  } else {
+    app.classList.remove('no-selection');
+  }
+  renderSidebar();
+  renderMain();
+}
+
+function renderSidebar() {
+  const search = document.getElementById('studentSearch').value.toLowerCase();
+  const sortBy = document.getElementById('sidebarSort').value;
+  const list = document.getElementById('studentList');
+  let filtered = state.students.filter(s => s.name.toLowerCase().includes(search));
+
+  // Sort
+  filtered = filtered.map(s => ({ student: s, stats: calcStudentStats(s) }));
+  filtered.sort((a, b) => {
+    if (sortBy === 'name') return a.student.name.localeCompare(b.student.name);
+    if (sortBy === 'gpa-desc') return (b.stats.gpa || 0) - (a.stats.gpa || 0);
+    if (sortBy === 'gpa-asc') return (a.stats.gpa || 0) - (b.stats.gpa || 0);
+    if (sortBy === 'rank-desc') return b.stats.rankScore - a.stats.rankScore;
+    if (sortBy === 'credits-desc') return b.stats.earnedCredits - a.stats.earnedCredits;
+    return 0;
+  });
+
+  list.innerHTML = filtered.map(({ student: s, stats }) => {
+    let badge;
+    if (sortBy === 'rank-desc') badge = stats.rankScore;
+    else if (sortBy === 'credits-desc') badge = stats.earnedCredits + 'cr';
+    else if (sortBy === 'gpa-asc') badge = fmtGPA(stats.gpa);
+    else badge = fmtGPA(stats.gpa);
+    return `<div class="student-item ${s.id === state.activeStudentId && state.view === 'detail' ? 'active' : ''}" data-id="${s.id}">
+      <span class="name">${esc(s.name)}</span>
+      <span class="gpa-badge">${badge}</span>
+    </div>`;
+  }).join('');
+
+  const cmpBtn = document.getElementById('btnCompare');
+  cmpBtn.classList.toggle('active', state.view === 'compare');
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+
+  if (state.view === 'compare') {
+    renderCompare(main);
+    return;
+  }
+
+  if (!state.activeStudentId) {
+    main.innerHTML = `<div class="welcome">
+      <h2>NCEA Grade Tracker</h2>
+      <p>Add a student to get started, or select one from the sidebar to view and manage their grades.</p>
+    </div>`;
+    return;
+  }
+
+  const student = state.students.find(s => s.id === state.activeStudentId);
+  if (!student) {
+    state.activeStudentId = null;
+    renderMain();
+    return;
+  }
+
+  const stats = calcStudentStats(student);
+
+  let html = `
+    <div class="student-header">
+      <div class="student-name-area">
+        <h2>${esc(student.name)} ${adminMode ? '<button class="edit-name-btn" data-action="rename" data-id="'+student.id+'" title="Rename">&#9998;</button>' : ''}</h2>
+      </div>
+      <div class="student-actions" ${!adminMode ? 'style="display:none"' : ''}>
+        <button class="btn btn-primary" data-action="add-subject" data-id="${student.id}">+ Add Subject</button>
+        <button class="btn btn-danger" data-action="delete-student" data-id="${student.id}">Delete Student</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Overall GPA</div>
+        <div class="value gpa">${fmtGPA(stats.gpa)}</div>
+        <div class="detail">of 4.00 max</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Credits Earned</div>
+        <div class="value">${stats.earnedCredits}</div>
+        <div class="detail">of ${stats.totalCredits} total</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Standards Graded</div>
+        <div class="value">${stats.gradedStandards}</div>
+        <div class="detail">of ${stats.totalStandards} total</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Grade Distribution</div>
+        <div class="grade-dist" style="margin-top:6px">
+          <span class="grade-dot e" title="Excellence">${stats.dist.e}</span>
+          <span class="grade-dot m" title="Merit">${stats.dist.m}</span>
+          <span class="grade-dot a" title="Achieved">${stats.dist.a}</span>
+          <span class="grade-dot na" title="Not Achieved">${stats.dist.na}</span>
+        </div>
+        <div class="detail" style="margin-top:4px">E · M · A · NA</div>
+      </div>
+    </div>`;
+
+  if (student.subjects.length === 0) {
+    html += `<div class="no-subjects-msg">No subjects added yet. Click <strong>+ Add Subject</strong> to get started.</div>`;
+  } else {
+    html += `<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;opacity:0.7">Tip: Click any standard code to view exemplars and resources on NZQA.</p>`;
+  }
+
+  student.subjects.forEach(subj => {
+    const ss = calcSubjectStats(subj);
+    const isOpen = state.openSubjects[subj.id] !== false;
+
+    html += `
+    <div class="subject-section">
+      <div class="subject-header ${isOpen ? 'open' : ''}" data-toggle="${subj.id}">
+        <span class="chevron">&#9654;</span>
+        <span class="subject-name">${esc(subj.name)}</span>
+        <div class="subject-stats">
+          <span>GPA: <strong>${fmtGPA(ss.gpa)}</strong></span>
+          <span>Credits: <strong>${ss.earnedCredits}/${ss.totalCredits}</strong></span>
+          <span>Graded: <strong>${ss.gradedStandards}/${ss.totalStandards}</strong></span>
+        </div>
+        ${adminMode ? '<button class="remove-subject" data-action="remove-subject" data-student="'+student.id+'" data-subject="'+subj.id+'" title="Remove subject">&times;</button>' : ''}
+      </div>
+      <div class="subject-body ${isOpen ? 'open' : ''}" id="body-${subj.id}">
+        <table class="standards-table">
+          <thead><tr>
+            <th>Code</th>
+            <th>Standard</th>
+            <th>Type</th>
+            <th>Credits</th>
+            <th>Grade</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody>`;
+
+    subj.standards.forEach((std, idx) => {
+      const gradeClass = std.grade ? `grade-${std.grade}` : 'grade-none';
+      const statusClass = `status-${std.status}`;
+
+      html += `<tr>
+        <td class="code"><a href="https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=${std.code.replace(/\D/g,'')}" target="_blank" style="color:var(--primary);text-decoration:none" title="View on NZQA">${esc(std.code)}</a></td>
+        <td class="std-name">${esc(std.name)}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${esc(std.type)}</td>
+        <td class="credits">${std.credits}</td>
+        <td>
+          <select class="grade-select ${gradeClass}" data-action="grade" data-student="${student.id}" data-subject="${subj.id}" data-idx="${idx}" ${!adminMode ? 'disabled style="opacity:0.7;cursor:default"' : ''}>
+            <option value="" ${!std.grade ? 'selected' : ''}>Not Graded</option>
+            <option value="na" ${std.grade === 'na' ? 'selected' : ''}>Not Achieved</option>
+            <option value="a" ${std.grade === 'a' ? 'selected' : ''}>Achieved</option>
+            <option value="m" ${std.grade === 'm' ? 'selected' : ''}>Merit</option>
+            <option value="e" ${std.grade === 'e' ? 'selected' : ''}>Excellence</option>
+          </select>
+        </td>
+        <td>
+          <select class="status-select ${statusClass}" data-action="status" data-student="${student.id}" data-subject="${subj.id}" data-idx="${idx}" ${!adminMode ? 'disabled style="opacity:0.7;cursor:default"' : ''}>
+            <option value="not-started" ${std.status === 'not-started' ? 'selected' : ''}>Not Started</option>
+            <option value="started" ${std.status === 'started' ? 'selected' : ''}>Started</option>
+            <option value="pending" ${std.status === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="received" ${std.status === 'received' ? 'selected' : ''}>Received Credits</option>
+            <option value="derived" ${std.status === 'derived' ? 'selected' : ''}>Derived</option>
+            <option value="failed" ${std.status === 'failed' ? 'selected' : ''}>Failed</option>
+          </select>
+        </td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div></div>`;
+  });
+
+  main.innerHTML = html;
+}
+
+function renderCompare(main) {
+  if (state.students.length === 0) {
+    main.innerHTML = `<div class="empty-compare"><h3>No students yet</h3><p>Add students to compare their results.</p></div>`;
+    return;
+  }
+
+  const rows = state.students.map(s => ({ student: s, stats: calcStudentStats(s) }));
+  const { key, dir } = state.compareSort;
+
+  rows.sort((a, b) => {
+    let va, vb;
+    if (key === 'name') { va = a.student.name.toLowerCase(); vb = b.student.name.toLowerCase(); }
+    else if (key === 'gpa') { va = a.stats.gpa ?? -1; vb = b.stats.gpa ?? -1; }
+    else if (key === 'rank') { va = a.stats.rankScore; vb = b.stats.rankScore; }
+    else if (key === 'earned') { va = a.stats.earnedCredits; vb = b.stats.earnedCredits; }
+    else if (key === 'total') { va = a.stats.totalCredits; vb = b.stats.totalCredits; }
+    else if (key === 'graded') { va = a.stats.gradedStandards; vb = b.stats.gradedStandards; }
+    else if (key === 'erate') { va = a.stats.excellenceRate; vb = b.stats.excellenceRate; }
+    else if (key === 'mrate') { va = a.stats.meritPlusRate; vb = b.stats.meritPlusRate; }
+    else if (key === 'completion') { va = a.stats.completionRate; vb = b.stats.completionRate; }
+    else { va = 0; vb = 0; }
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const allGPAs = rows.map(r => r.stats.gpa).filter(g => g !== null);
+  const avgGPA = allGPAs.length ? (allGPAs.reduce((a,b) => a+b, 0) / allGPAs.length) : null;
+  const maxGPA = allGPAs.length ? Math.max(...allGPAs) : null;
+  const totalEarned = rows.reduce((n, r) => n + r.stats.earnedCredits, 0);
+  const maxRank = rows.length ? Math.max(...rows.map(r => r.stats.rankScore)) : 0;
+  const avgRank = rows.length ? Math.round(rows.reduce((n,r) => n + r.stats.rankScore, 0) / rows.length) : 0;
+  const totalStudents = rows.length;
+  const avgExcRate = rows.length ? Math.round(rows.reduce((n,r) => n + r.stats.excellenceRate, 0) / rows.length) : 0;
+  const avgCompletion = rows.length ? Math.round(rows.reduce((n,r) => n + r.stats.completionRate, 0) / rows.length) : 0;
+  const topStudent = rows.length ? rows.reduce((best, r) => (r.stats.gpa || 0) > (best.stats.gpa || 0) ? r : best, rows[0]) : null;
+
+  function sortArrow(k) {
+    if (key !== k) return '';
+    return `<span class="sort-arrow">${dir === 'asc' ? '▲' : '▼'}</span>`;
+  }
+
+  let html = `
+    <div class="compare-header">
+      <h2>Student Comparison</h2>
+      <p>${state.students.length} student${state.students.length !== 1 ? 's' : ''} tracked</p>
+    </div>
+    <div class="compare-stats" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card">
+        <div class="label">Average GPA</div>
+        <div class="value gpa">${fmtGPA(avgGPA)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Highest GPA</div>
+        <div class="value gpa">${fmtGPA(maxGPA)}</div>
+        <div class="detail">${topStudent ? topStudent.student.name : ''}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Highest Rank Score</div>
+        <div class="value">${maxRank}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg Rank Score</div>
+        <div class="value">${avgRank}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Credits Earned</div>
+        <div class="value">${totalEarned}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Students</div>
+        <div class="value">${totalStudents}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg Excellence Rate</div>
+        <div class="value">${avgExcRate}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg Completion</div>
+        <div class="value">${avgCompletion}%</div>
+      </div>
+    </div>
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead><tr>
+          <th data-sort="name" class="${key==='name'?'sorted':''}"># ${sortArrow('name')}</th>
+          <th data-sort="name" class="${key==='name'?'sorted':''}">Student ${sortArrow('name')}</th>
+          <th data-sort="gpa" class="${key==='gpa'?'sorted':''}">GPA ${sortArrow('gpa')}</th>
+          <th data-sort="rank" class="${key==='rank'?'sorted':''}">Rank Score ${sortArrow('rank')}</th>
+          <th data-sort="earned" class="${key==='earned'?'sorted':''}">Credits ${sortArrow('earned')}</th>
+          <th data-sort="erate" class="${key==='erate'?'sorted':''}">E% ${sortArrow('erate')}</th>
+          <th data-sort="mrate" class="${key==='mrate'?'sorted':''}">M+% ${sortArrow('mrate')}</th>
+          <th data-sort="completion" class="${key==='completion'?'sorted':''}">Done ${sortArrow('completion')}</th>
+          <th>Distribution</th>
+        </tr></thead>
+        <tbody>`;
+
+  rows.forEach(({ student, stats }, idx) => {
+    const gpa = stats.gpa;
+    const pct = gpa !== null ? (gpa / 4 * 100) : 0;
+    const barCol = gpa !== null ? gpaBarColor(gpa) : '#ddd';
+
+    html += `<tr>
+      <td style="color:var(--text-muted);font-size:12px;font-weight:600;text-align:center">${idx + 1}</td>
+      <td class="student-name-cell" data-action="go-student" data-id="${student.id}">${esc(student.name)}</td>
+      <td>
+        <div class="gpa-bar-wrap">
+          <span style="font-weight:600;width:42px">${fmtGPA(gpa)}</span>
+          <div class="gpa-bar"><div class="gpa-bar-fill" style="width:${pct}%;background:${barCol}"></div></div>
+        </div>
+      </td>
+      <td style="font-weight:700;color:var(--primary-dark)">${stats.rankScore}</td>
+      <td>${stats.earnedCredits}<span style="color:var(--text-muted);font-size:11px">/${stats.totalCredits}</span></td>
+      <td style="font-size:12px">${stats.excellenceRate.toFixed(0)}%</td>
+      <td style="font-size:12px">${stats.meritPlusRate.toFixed(0)}%</td>
+      <td style="font-size:12px">${stats.completionRate.toFixed(0)}%</td>
+      <td>
+        <div class="grade-dist">
+          <span class="grade-dot e" title="Excellence">${stats.dist.e}</span>
+          <span class="grade-dot m" title="Merit">${stats.dist.m}</span>
+          <span class="grade-dot a" title="Achieved">${stats.dist.a}</span>
+          <span class="grade-dot na" title="Not Achieved">${stats.dist.na}</span>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>
+    <div class="chart-container">
+      <h3>GPA Comparison</h3>
+      <div class="chart-wrap" style="height:${Math.max(200, rows.length * 40)}px"><canvas id="gpaChart"></canvas></div>
+    </div>
+    <div class="chart-container">
+      <h3>Rank Score Comparison</h3>
+      <div class="chart-wrap" style="height:${Math.max(200, rows.length * 40)}px"><canvas id="rankChart"></canvas></div>
+    </div>`;
+
+  main.innerHTML = html;
+
+  requestAnimationFrame(() => {
+    buildCompareChart(rows);
+    buildRankChart(rows);
+  });
+}
+
+function buildRankChart(rows) {
+  const canvas = document.getElementById('rankChart');
+  if (!canvas) return;
+  const sorted = [...rows].sort((a,b) => b.stats.rankScore - a.stats.rankScore);
+  const labels = sorted.map(r => r.student.name);
+  const scores = sorted.map(r => r.stats.rankScore);
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Rank Score',
+        data: scores,
+        backgroundColor: 'rgba(200,169,78,0.2)',
+        borderColor: '#c8a94e',
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, grid: { color: '#e4e9f0' } },
+        y: { grid: { display: false }, ticks: { font: { size: 12 }, autoSkip: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => 'Rank Score: ' + ctx.parsed.x } }
+      }
+    }
+  });
+}
+
+function gpaBarColor(gpa) {
+  if (gpa >= 3.5) return '#c8a94e';
+  if (gpa >= 2.5) return '#2c6fba';
+  if (gpa >= 1.5) return '#3d8b37';
+  return '#c44536';
+}
+
+function buildCompareChart(rows) {
+  const canvas = document.getElementById('gpaChart');
+  if (!canvas) return;
+
+  if (compareChart) { compareChart.destroy(); compareChart = null; }
+
+  const labels = rows.map(r => r.student.name);
+  const gpas = rows.map(r => r.stats.gpa ?? 0);
+  const colors = gpas.map(g => gpaBarColor(g));
+
+  compareChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'GPA',
+        data: gpas,
+        backgroundColor: colors.map(c => c + '33'),
+        borderColor: colors,
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, max: 4, grid: { color: '#e4e9f0' } },
+        y: { grid: { display: false }, ticks: { font: { size: 12 }, autoSkip: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `GPA: ${ctx.parsed.x.toFixed(2)}`
+          }
+        }
+      }
+    }
+  });
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ==========================================
+// MODAL
+// ==========================================
+function openModal(title, bodyHTML) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHTML;
+  document.getElementById('modalOverlay').classList.add('open');
+  const input = document.querySelector('#modalBody input');
+  if (input) setTimeout(() => input.focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function showAddStudentModal() {
+  openModal('Add Student', `
+    <input type="text" id="newStudentName" placeholder="Student name…">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="btnConfirmAddStudent">Add Student</button>
+    </div>
+  `);
+
+  document.getElementById('btnConfirmAddStudent').addEventListener('click', () => {
+    const name = document.getElementById('newStudentName').value.trim();
+    if (name) { addStudent(name); closeModal(); }
+  });
+  document.getElementById('newStudentName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const name = document.getElementById('newStudentName').value.trim();
+      if (name) { addStudent(name); closeModal(); }
+    }
+  });
+}
+
+function showRenameModal(id) {
+  const student = state.students.find(s => s.id === id);
+  if (!student) return;
+  openModal('Rename Student', `
+    <input type="text" id="renameInput" value="${esc(student.name)}">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="btnConfirmRename">Save</button>
+    </div>
+  `);
+  document.getElementById('renameInput').select();
+  document.getElementById('btnConfirmRename').addEventListener('click', () => {
+    const name = document.getElementById('renameInput').value.trim();
+    if (name) { renameStudent(id, name); closeModal(); }
+  });
+  document.getElementById('renameInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const name = document.getElementById('renameInput').value.trim();
+      if (name) { renameStudent(id, name); closeModal(); }
+    }
+  });
+}
+
+function showAddSubjectModal(studentId) {
+  const student = state.students.find(s => s.id === studentId);
+  if (!student) return;
+
+  const existing = new Set(student.subjects.map(s => s.templateKey));
+  const available = Object.keys(SUBJECT_TEMPLATES).filter(k => !existing.has(k));
+
+  if (available.length === 0) {
+    openModal('Add Subject', `<p style="color:var(--text-muted)">All available subjects have already been added to this student.</p>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Close</button></div>`);
+    return;
+  }
+
+  const items = available.map(k => {
+    const count = SUBJECT_TEMPLATES[k].length;
+    const totalCreds = SUBJECT_TEMPLATES[k].reduce((n, s) => n + s.credits, 0);
+    return `<div class="subject-pick-item" data-action="pick-subject" data-student="${studentId}" data-template="${esc(k)}">
+      ${esc(k)} <span class="std-count">${count} standards · ${totalCreds} credits</span>
+    </div>`;
+  }).join('');
+
+  openModal('Add Subject', `<div class="subject-pick-list">${items}</div>`);
+}
+
+function showDeleteConfirm(id) {
+  const student = state.students.find(s => s.id === id);
+  if (!student) return;
+  openModal('Delete Student', `
+    <p>Are you sure you want to delete <strong>${esc(student.name)}</strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="btnConfirmDelete">Delete</button>
+    </div>
+  `);
+  document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+    deleteStudent(id);
+    closeModal();
+  });
+}
+
+// ==========================================
+// EVENT HANDLING
+// ==========================================
+document.getElementById('studentList').addEventListener('click', e => {
+  const item = e.target.closest('.student-item');
+  if (item) {
+    state.activeStudentId = item.dataset.id;
+    state.view = 'detail';
+    render();
+  }
+});
+
+document.getElementById('btnAddStudent').addEventListener('click', showAddStudentModal);
+
+document.getElementById('btnCompare').addEventListener('click', () => {
+  state.view = 'compare';
+  state.activeStudentId = null;
+  render();
+});
+
+document.getElementById('studentSearch').addEventListener('input', renderSidebar);
+document.getElementById('sidebarSort').addEventListener('change', renderSidebar);
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+
+document.getElementById('main').addEventListener('click', e => {
+  const target = e.target;
+
+  // Subject toggle
+  const toggle = target.closest('[data-toggle]');
+  if (toggle && !target.closest('.remove-subject')) {
+    const subId = toggle.dataset.toggle;
+    state.openSubjects[subId] = !(state.openSubjects[subId] !== false);
+    saveState();
+    renderMain();
+    return;
+  }
+
+  const action = target.dataset.action;
+  if (!action) return;
+
+  if (action === 'add-subject') showAddSubjectModal(target.dataset.id);
+  if (action === 'delete-student') showDeleteConfirm(target.dataset.id);
+  if (action === 'rename') showRenameModal(target.dataset.id);
+  if (action === 'remove-subject') {
+    e.stopPropagation();
+    removeSubject(target.dataset.student, target.dataset.subject);
+  }
+  if (action === 'go-student') {
+    state.activeStudentId = target.dataset.id;
+    state.view = 'detail';
+    render();
+  }
+});
+
+document.getElementById('main').addEventListener('change', e => {
+  const target = e.target;
+  if (target.dataset.action === 'grade') {
+    updateGrade(target.dataset.student, target.dataset.subject, parseInt(target.dataset.idx), target.value);
+  }
+  if (target.dataset.action === 'status') {
+    updateStatus(target.dataset.student, target.dataset.subject, parseInt(target.dataset.idx), target.value);
+  }
+});
+
+document.getElementById('main').addEventListener('click', e => {
+  const th = e.target.closest('.compare-table th[data-sort]');
+  if (th) {
+    const key = th.dataset.sort;
+    if (state.compareSort.key === key) {
+      state.compareSort.dir = state.compareSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      state.compareSort.key = key;
+      state.compareSort.dir = key === 'name' ? 'asc' : 'desc';
+    }
+    renderMain();
+  }
+});
+
+document.getElementById('modalBody').addEventListener('click', e => {
+  const pick = e.target.closest('[data-action="pick-subject"]');
+  if (pick) {
+    addSubjectToStudent(pick.dataset.student, pick.dataset.template);
+    closeModal();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ==========================================
+// ADMIN MODE
+// ==========================================
+const ADMIN_PASS = '183.hq';
+let adminMode = false;
+
+function setAdminMode(on) {
+  adminMode = on;
+  const btn = document.getElementById('btnAdmin');
+  const addBtn = document.getElementById('btnAddStudent');
+  if (on) {
+    btn.innerHTML = '🔓 Admin Mode';
+    btn.style.background = 'rgba(200,169,78,0.2)';
+    btn.style.color = '#c8a94e';
+    btn.style.borderColor = 'rgba(200,169,78,0.3)';
+    addBtn.style.display = '';
+  } else {
+    btn.innerHTML = '🔒 Admin Mode';
+    btn.style.background = 'rgba(255,255,255,0.06)';
+    btn.style.color = 'rgba(255,255,255,0.5)';
+    btn.style.borderColor = 'rgba(255,255,255,0.1)';
+    addBtn.style.display = 'none';
+  }
+  render();
+}
+
+function requireAdmin(callback) {
+  if (adminMode) { callback(); return; }
+  openModal('Admin Access', `
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:12px">Enter the admin passcode to make changes.</p>
+    <input type="password" id="adminPassInput" placeholder="Passcode" style="text-align:center">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="btnAdminConfirm">Unlock</button>
+    </div>
+  `);
+  document.getElementById('btnAdminConfirm').addEventListener('click', function() {
+    if (document.getElementById('adminPassInput').value === ADMIN_PASS) {
+      setAdminMode(true);
+      closeModal();
+      callback();
+    } else {
+      document.getElementById('adminPassInput').value = '';
+      document.getElementById('adminPassInput').placeholder = 'Incorrect — try again';
+      document.getElementById('adminPassInput').focus();
+    }
+  });
+  document.getElementById('adminPassInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('btnAdminConfirm').click();
+  });
+}
+
+document.getElementById('btnAdmin').addEventListener('click', function() {
+  if (adminMode) {
+    setAdminMode(false);
+  } else {
+    requireAdmin(function(){});
+  }
+});
+
+// Wrap edit actions with admin check
+const _showAddStudentModal = showAddStudentModal;
+showAddStudentModal = function() { requireAdmin(_showAddStudentModal); };
+
+const _showDeleteConfirm = showDeleteConfirm;
+showDeleteConfirm = function(id) { requireAdmin(function(){ _showDeleteConfirm(id); }); };
+
+const _showRenameModal = showRenameModal;
+showRenameModal = function(id) { requireAdmin(function(){ _showRenameModal(id); }); };
+
+const _showAddSubjectModal = showAddSubjectModal;
+showAddSubjectModal = function(id) { requireAdmin(function(){ _showAddSubjectModal(id); }); };
+
+const _removeSubject = removeSubject;
+removeSubject = function(sid, subid) { requireAdmin(function(){ _removeSubject(sid, subid); }); };
+
+const _updateGrade = updateGrade;
+updateGrade = function(a,b,c,d) { if(!adminMode){render();return;} _updateGrade(a,b,c,d); };
+
+const _updateStatus = updateStatus;
+updateStatus = function(a,b,c,d) { if(!adminMode){render();return;} _updateStatus(a,b,c,d); };
+
+// ==========================================
+// ==========================================
+// FIREBASE SYNC
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCaUabmvdt1UEzxbTRprs1VsvxXju2A_sg",
+  authDomain: "aroha-te-ao.firebaseapp.com",
+  projectId: "aroha-te-ao",
+  storageBucket: "aroha-te-ao.firebasestorage.app",
+  messagingSenderId: "222775558795",
+  appId: "1:222775558795:web:f8ba238ce96405d35e0a8e"
+};
+
+let db;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch(e) { db = null; }
+
+// Override saveState to sync to Firestore
+const _localSaveState = saveState;
+saveState = function() {
+  _localSaveState();
+  if (db) {
+    db.collection('app').doc('tracker').set({
+      students: state.students,
+      openSubjects: state.openSubjects
+    }).catch(e => console.warn('Firestore write failed:', e));
+  }
+};
+
+// Init: load templates + student data from Firestore, fall back to localStorage
+async function firebaseInit() {
+  if (!db) { loadState(); render(); return; }
+
+  // Load templates from Firestore
+  try {
+    const tDoc = await db.collection('app').doc('templates').get();
+    if (tDoc.exists) {
+      const stored = tDoc.data().templates || {};
+      Object.keys(stored).forEach(k => { SUBJECT_TEMPLATES[k] = stored[k]; });
+    }
+  } catch(e) {}
+  // Push merged templates back
+  db.collection('app').doc('templates').set({ templates: SUBJECT_TEMPLATES }).catch(() => {});
+
+  // Load tracker data from Firestore
+  try {
+    const sDoc = await db.collection('app').doc('tracker').get();
+    if (sDoc.exists) {
+      const data = sDoc.data();
+      state.students = data.students || [];
+      state.openSubjects = data.openSubjects || {};
+    } else {
+      loadState();
+      saveState();
+    }
+  } catch(e) {
+    loadState();
+  }
+  render();
+
+  // Real-time listener for changes from other users
+  db.collection('app').doc('tracker').onSnapshot(doc => {
+    if (doc.exists && !doc.metadata.hasPendingWrites) {
+      const data = doc.data();
+      state.students = data.students || [];
+      state.openSubjects = data.openSubjects || {};
+      render();
+    }
+  });
+
+  // Listen for template changes from manage page
+  db.collection('app').doc('templates').onSnapshot(doc => {
+    if (doc.exists && !doc.metadata.hasPendingWrites) {
+      const stored = doc.data().templates || {};
+      Object.keys(stored).forEach(k => { SUBJECT_TEMPLATES[k] = stored[k]; });
+    }
+  });
+}
+
+firebaseInit();
+</script>
+<script src="kaitiaki-widget.js"></script>
+</body>
+</html>

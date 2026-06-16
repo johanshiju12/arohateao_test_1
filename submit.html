@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Aroha Te Ao — Submit</title>
+<style>
+:root {
+  --green: #1a3f6b;
+  --green-dark: #0a1e3d;
+  --gold: #c8a94e;
+  --cream: #edf2f8;
+  --white: #ffffff;
+  --text: #1a1e2a;
+  --text-muted: #6a7080;
+  --border: #d0d8e4;
+  --red: #c44536;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-body); color: #fff; line-height: 1.7; background: #0a1e3d; }
+.topbar { background: var(--green-dark); padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; }
+.topbar .brand { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: #fff; text-decoration: none; }
+.topbar nav { display: flex; gap: 24px; }
+.topbar nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+.topbar nav a:hover { color: #fff; }
+.topbar nav a.active { color: var(--gold); }
+.page-header {
+  background: transparent;
+  padding: 80px 40px 60px; text-align: center; position: relative; overflow: hidden;
+}
+
+.page-header .ornament { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:20px; opacity:0.35; }
+.page-header .ornament .line { width:40px; height:1px; background:var(--gold); }
+.page-header .ornament .diamond { width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+.page-header h1 { font-family:var(--font-display); font-size:40px; color:#fff; font-weight:700; margin-bottom:8px; position:relative; }
+.page-header p { color:rgba(255,255,255,0.5); font-size:15px; position:relative; }
+
+.content { max-width: 100%; margin: 0 auto; padding: 60px 40px 120px; }
+.card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 40px; margin-bottom: 24px; }
+.card h2 { font-family: var(--font-display); font-size: 22px; color: #fff; margin-bottom: 6px; }
+.card .card-desc { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 24px; }
+
+label.field-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.5); margin-bottom: 6px; margin-top: 18px; }
+label.field-label:first-of-type { margin-top: 0; }
+input[type="text"], input[type="number"] { width: 100%; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; font-size: 14px; font-family: var(--font-body); outline: none; background: rgba(10,30,61,0.8); color: #fff; transition: border-color 0.2s; }
+input:focus { border-color: var(--gold); }
+
+.subject-checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
+.subject-check { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.08); color: #fff; }
+.subject-check:hover { border-color: var(--gold); background: rgba(255,255,255,0.12); }
+.subject-check input { accent-color: var(--gold); width: 16px; height: 16px; }
+.subject-check.checked { border-color: var(--gold); background: rgba(200,169,78,0.15); color: #fff; }
+
+.std-row { display: grid; grid-template-columns: 100px 1fr 70px 100px 36px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.std-row input, .std-row select { padding: 8px 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; font-size: 13px; font-family: var(--font-body); outline: none; background: rgba(10,30,61,0.8); color: #fff; }
+.std-row select { -webkit-appearance: none; appearance: none; cursor: pointer; }
+.std-row .remove-std { width: 28px; height: 28px; border: none; background: none; color: var(--red); font-size: 18px; cursor: pointer; border-radius: 6px; transition: background 0.15s; }
+.std-row .remove-std:hover { background: #fce8e6; }
+.std-labels { display: grid; grid-template-columns: 100px 1fr 70px 100px 36px; gap: 8px; margin-bottom: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); font-weight: 600; }
+
+.btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--green); color: #fff; }
+.btn-primary:hover { background: var(--green-dark); }
+.btn-ghost { background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.12); }
+.btn-ghost:hover { background: #e4e9f0; }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: #d4b65a; }
+.btn-row { display: flex; gap: 8px; margin-top: 24px; }
+
+.success-msg { display: none; text-align: center; padding: 40px 20px; }
+.success-msg .check { width: 56px; height: 56px; border-radius: 50%; background: #e6f4e5; color: #3d8b37; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
+.success-msg h3 { font-family: var(--font-display); font-size: 20px; color: #fff; margin-bottom: 6px; }
+.success-msg p { color: rgba(255,255,255,0.5); font-size: 14px; }
+
+.footer { padding: 32px 40px 72px; text-align: center; font-size: 12px; color: #b5b0a8; }
+@media (max-width: 700px) {
+  .topbar { padding: 14px 20px; } .topbar nav { gap: 16px; }
+  .page-header { padding: 60px 20px 48px; } .content { padding: 40px 20px 80px; }
+  .subject-checks { grid-template-columns: 1fr; }
+  .std-row { grid-template-columns: 80px 1fr 60px 80px 30px; gap: 4px; }
+  .std-labels { grid-template-columns: 80px 1fr 60px 80px 30px; gap: 4px; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="brand">Aroha Te Ao</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="submit.html" class="active">Submit</a>
+    <a href="manage.html">Manage</a>
+  </nav>
+</div>
+<div class="page-header">
+  <div class="ornament"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <h1>Submit</h1>
+  <p>Enrol yourself or suggest a new subject</p>
+</div>
+<div class="content">
+
+  <!-- ENROLMENT FORM -->
+  <div class="card" id="enrolCard">
+    <div id="enrolForm">
+      <h2>Join Aroha Te Ao</h2>
+      <p class="card-desc">Submit your name, subjects, and any grades you already have. An admin will review and add you to the tracker.</p>
+      <label class="field-label">Your Full Name</label>
+      <input type="text" id="enrolName" placeholder="e.g. John Smith">
+      <label class="field-label">Select Your Subjects</label>
+      <div class="subject-checks" id="subjectChecks"></div>
+      <div id="gradeEntrySection" style="display:none;margin-top:20px">
+        <label class="field-label">Pre-fill Your Grades (optional)</label>
+        <p style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px">For any standards you've already completed, select your grade. Leave as "Not Graded" for ones you haven't done yet.</p>
+        <div id="gradeEntryList"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnSubmitEnrol" style="width:100%;padding:14px;justify-content:center">Submit Enrolment</button>
+      </div>
+    </div>
+    <div class="success-msg" id="enrolSuccess">
+      <div class="check">✓</div>
+      <h3>Enrolment Submitted</h3>
+      <p>An admin will review your submission and add you to the tracker.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:20px"><button class="btn btn-ghost" onclick="location.reload()">Submit Another</button></div>
+    </div>
+  </div>
+
+  <!-- SUBMIT RESULTS -->
+  <div class="card" id="resultsCard">
+    <div id="resultsForm">
+      <h2>Submit Results</h2>
+      <p class="card-desc">Already on the tracker? Submit new grades here for admin approval.</p>
+      <label class="field-label">Your Name (as it appears on the tracker)</label>
+      <input type="text" id="resultsName" placeholder="e.g. John Smith">
+      <label class="field-label">Results to Submit</label>
+      <p style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px">Add each standard and grade you want to update.</p>
+      <div id="resultsRows"></div>
+      <button class="btn btn-ghost" id="btnAddResultRow" style="margin-top:8px;font-size:12px">+ Add Result</button>
+      <div class="btn-row">
+        <button class="btn btn-gold" id="btnSubmitResults" style="width:100%;padding:14px;justify-content:center">Submit Results</button>
+      </div>
+    </div>
+    <div class="success-msg" id="resultsSuccess">
+      <div class="check">✓</div>
+      <h3>Results Submitted</h3>
+      <p>An admin will review and apply your results to the tracker.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:20px"><button class="btn btn-ghost" onclick="location.reload()">Submit Another</button></div>
+    </div>
+  </div>
+
+  <!-- SUBJECT SUGGESTION FORM -->
+  <div class="card" id="subjectCard">
+    <div id="subjectForm">
+      <h2>Suggest a Subject</h2>
+      <p class="card-desc">Have a subject that's not in the tracker? Submit it with its standards and an admin can add it.</p>
+      <label class="field-label">Subject Name</label>
+      <input type="text" id="suggestName" placeholder="e.g. Art Level 2">
+      <label class="field-label">Your Name (optional)</label>
+      <input type="text" id="suggestBy" placeholder="So we know who suggested it">
+      <label class="field-label" style="margin-top:24px">Standards</label>
+      <div class="std-labels"><span>Code</span><span>Standard Name</span><span>Credits</span><span>Type</span><span></span></div>
+      <div id="stdRows"></div>
+      <button class="btn btn-ghost" id="btnAddStdRow" style="margin-top:4px;font-size:12px">+ Add Standard</button>
+      <div class="btn-row">
+        <button class="btn btn-gold" id="btnSubmitSubject" style="width:100%;padding:14px;justify-content:center">Submit Subject</button>
+      </div>
+    </div>
+    <div class="success-msg" id="subjectSuccess">
+      <div class="check">✓</div>
+      <h3>Subject Submitted</h3>
+      <p>An admin will review your subject suggestion and can add it to the tracker.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:20px"><button class="btn btn-ghost" onclick="location.reload()">Submit Another</button></div>
+    </div>
+  </div>
+
+</div>
+<footer class="footer">&copy; 2026 Aroha Te Ao. All rights reserved.</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCaUabmvdt1UEzxbTRprs1VsvxXju2A_sg",
+  authDomain: "aroha-te-ao.firebaseapp.com",
+  projectId: "aroha-te-ao",
+  storageBucket: "aroha-te-ao.firebasestorage.app",
+  messagingSenderId: "222775558795",
+  appId: "1:222775558795:web:f8ba238ce96405d35e0a8e"
+};
+let db;
+try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { db = null; }
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+// Load templates from Firestore and build subject checkboxes
+async function initSubmitPage() {
+  const checksDiv = document.getElementById('subjectChecks');
+  let templates = {};
+
+  if (db) {
+    try {
+      const doc = await db.collection('app').doc('templates').get();
+      if (doc.exists) templates = doc.data().templates || {};
+    } catch(e) {}
+  }
+
+  const subjectNames = Object.keys(templates).sort();
+  if (subjectNames.length === 0) {
+    checksDiv.innerHTML = '<p style="color:rgba(255,255,255,0.5);font-size:13px;grid-column:1/-1">No subjects loaded yet. Ask an admin to set up subjects first.</p>';
+  } else {
+    checksDiv.innerHTML = '';
+    subjectNames.forEach(name => {
+      const totalCr = templates[name].reduce((n,s) => n + s.credits, 0);
+      const label = document.createElement('label');
+      label.className = 'subject-check';
+      label.innerHTML = '<input type="checkbox" value="' + name.replace(/"/g,'&quot;') + '"> ' + name + ' <span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:auto">' + totalCr + 'cr</span>';
+      label.querySelector('input').addEventListener('change', function() {
+        label.classList.toggle('checked', this.checked);
+        buildGradeEntry();
+      });
+      checksDiv.appendChild(label);
+    });
+  }
+
+  // Build grade entry section when subjects are selected
+  function buildGradeEntry() {
+    const checked = Array.from(checksDiv.querySelectorAll('input:checked')).map(cb => cb.value);
+    const section = document.getElementById('gradeEntrySection');
+    const list = document.getElementById('gradeEntryList');
+    if (checked.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    let html = '';
+    checked.forEach(subjName => {
+      const stds = templates[subjName] || [];
+      html += '<div style="margin-bottom:16px"><h4 style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:8px">' + subjName + '</h4>';
+      stds.forEach((std, i) => {
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">';
+        html += '<span style="color:rgba(255,255,255,0.7);min-width:70px;font-weight:600">' + std.code + '</span>';
+        html += '<span style="flex:1;color:rgba(255,255,255,0.5);font-size:11px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + std.name + '</span>';
+        html += '<select class="grade-entry-select" data-subject="' + subjName.replace(/"/g,'&quot;') + '" data-idx="' + i + '" style="padding:4px 8px;border:1px solid rgba(255,255,255,0.15);border-radius:5px;font-size:11px;background:rgba(10,30,61,0.8);color:#fff;outline:none">';
+        html += '<option value="">Not Graded</option><option value="na">NA</option><option value="a">Achieved</option><option value="m">Merit</option><option value="e">Excellence</option></select>';
+        html += '<select class="grade-entry-status" data-subject="' + subjName.replace(/"/g,'&quot;') + '" data-idx="' + i + '" style="padding:4px 6px;border:1px solid rgba(255,255,255,0.15);border-radius:5px;font-size:10px;background:rgba(10,30,61,0.8);color:#fff;outline:none;margin-left:4px">';
+        html += '<option value="received">Normal</option><option value="derived">Derived</option></select></div>';
+      });
+      html += '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  // ENROLMENT SUBMIT
+  document.getElementById('btnSubmitEnrol').addEventListener('click', async function() {
+    const name = document.getElementById('enrolName').value.trim();
+    if (!name) { document.getElementById('enrolName').placeholder = 'Please enter your name'; document.getElementById('enrolName').focus(); return; }
+    const checked = Array.from(checksDiv.querySelectorAll('input:checked')).map(cb => cb.value);
+    if (checked.length === 0) return;
+
+    // Collect pre-filled grades and statuses
+    const grades = {};
+    const statuses = {};
+    document.querySelectorAll('.grade-entry-select').forEach(sel => {
+      if (sel.value) {
+        const subj = sel.dataset.subject;
+        const idx = parseInt(sel.dataset.idx);
+        if (!grades[subj]) grades[subj] = {};
+        grades[subj][idx] = sel.value;
+      }
+    });
+    document.querySelectorAll('.grade-entry-status').forEach(sel => {
+      const subj = sel.dataset.subject;
+      const idx = parseInt(sel.dataset.idx);
+      if (sel.value === 'derived') {
+        if (!statuses[subj]) statuses[subj] = {};
+        statuses[subj][idx] = 'derived';
+      }
+    });
+
+    const item = { id: uid(), studentName: name, subjects: checked, grades: grades, statuses: statuses, timestamp: new Date().toISOString() };
+    if (db) {
+      try {
+        const doc = await db.collection('app').doc('pendingEnrollments').get();
+        const items = doc.exists ? (doc.data().items || []) : [];
+        items.push(item);
+        await db.collection('app').doc('pendingEnrollments').set({ items });
+      } catch(e) { console.warn('Submit failed:', e); }
+    }
+    document.getElementById('enrolForm').style.display = 'none';
+    document.getElementById('enrolSuccess').style.display = 'block';
+  });
+
+  // SUBMIT RESULTS
+  function addResultRow() {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:120px 1fr 110px 70px 30px;gap:8px;align-items:center;margin-bottom:8px';
+    row.innerHTML = '<input type="text" placeholder="Standard code" style="padding:8px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:12px;background:rgba(10,30,61,0.8);color:#fff;outline:none">' +
+      '<input type="text" placeholder="Standard name (optional)" style="padding:8px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:12px;background:rgba(10,30,61,0.8);color:#fff;outline:none">' +
+      '<select class="result-grade" style="padding:8px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:12px;background:rgba(10,30,61,0.8);color:#fff;outline:none"><option value="na">Not Achieved</option><option value="a">Achieved</option><option value="m">Merit</option><option value="e">Excellence</option></select>' +
+      '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer"><input type="checkbox" class="result-derived" style="accent-color:#6b4fa0"> Derived</label>' +
+      '<button style="background:none;border:none;color:#c44536;font-size:16px;cursor:pointer" onclick="this.parentElement.remove()">&times;</button>';
+    document.getElementById('resultsRows').appendChild(row);
+  }
+  addResultRow(); addResultRow(); addResultRow();
+  document.getElementById('btnAddResultRow').addEventListener('click', addResultRow);
+
+  document.getElementById('btnSubmitResults').addEventListener('click', async function() {
+    const name = document.getElementById('resultsName').value.trim();
+    if (!name) { document.getElementById('resultsName').placeholder = 'Please enter your name'; document.getElementById('resultsName').focus(); return; }
+    const rows = document.querySelectorAll('#resultsRows > div');
+    const results = [];
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input[type="text"]');
+      const sel = row.querySelector('.result-grade');
+      const derivedCb = row.querySelector('.result-derived');
+      const code = inputs[0].value.trim();
+      const stdName = inputs[1].value.trim();
+      const grade = sel ? sel.value : '';
+      const isDerived = derivedCb ? derivedCb.checked : false;
+      if (code && grade) results.push({ code, name: stdName, grade, derived: isDerived });
+    });
+    if (results.length === 0) return;
+    const item = { id: uid(), studentName: name, results, timestamp: new Date().toISOString() };
+    if (db) {
+      try {
+        const doc = await db.collection('app').doc('pendingResults').get();
+        const items = doc.exists ? (doc.data().items || []) : [];
+        items.push(item);
+        await db.collection('app').doc('pendingResults').set({ items });
+      } catch(e) { console.warn('Submit failed:', e); }
+    }
+    document.getElementById('resultsForm').style.display = 'none';
+    document.getElementById('resultsSuccess').style.display = 'block';
+  });
+
+  // SUBJECT SUGGESTION: Dynamic rows
+  function addStdRow() {
+    const row = document.createElement('div');
+    row.className = 'std-row';
+    row.innerHTML = '<input type="text" placeholder="AS91XXX"><input type="text" placeholder="Standard name"><input type="number" placeholder="0" min="1" max="20" style="text-align:center"><select><option value="Internal">Internal</option><option value="External">External</option></select><button class="remove-std" title="Remove">&times;</button>';
+    row.querySelector('.remove-std').addEventListener('click', () => row.remove());
+    document.getElementById('stdRows').appendChild(row);
+  }
+  addStdRow(); addStdRow(); addStdRow();
+  document.getElementById('btnAddStdRow').addEventListener('click', addStdRow);
+
+  document.getElementById('btnSubmitSubject').addEventListener('click', async function() {
+    const name = document.getElementById('suggestName').value.trim();
+    if (!name) { document.getElementById('suggestName').placeholder = 'Please enter a subject name'; document.getElementById('suggestName').focus(); return; }
+    const by = document.getElementById('suggestBy').value.trim();
+    const rows = document.querySelectorAll('#stdRows .std-row');
+    const standards = [];
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const sel = row.querySelector('select');
+      const code = inputs[0].value.trim(), sname = inputs[1].value.trim(), credits = parseInt(inputs[2].value) || 0;
+      if (code && sname && credits > 0) standards.push({ code, name: sname, credits, type: sel.value });
+    });
+    if (standards.length === 0) return;
+    const item = { id: uid(), name, standards, submittedBy: by || 'Anonymous', timestamp: new Date().toISOString() };
+    if (db) {
+      try {
+        const doc = await db.collection('app').doc('pendingSubjects').get();
+        const items = doc.exists ? (doc.data().items || []) : [];
+        items.push(item);
+        await db.collection('app').doc('pendingSubjects').set({ items });
+      } catch(e) { console.warn('Submit failed:', e); }
+    }
+    document.getElementById('subjectForm').style.display = 'none';
+    document.getElementById('subjectSuccess').style.display = 'block';
+  });
+}
+
+initSubmitPage();
+</script>
+<script src="kaitiaki-widget.js"></script>
+</body>
+</html>

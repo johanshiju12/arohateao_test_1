@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Aroha Te Ao — Contact</title>
+<style>
+:root {
+  --green: #1a3f6b;
+  --green-dark: #0a1e3d;
+  --gold: #c8a94e;
+  --cream: #edf2f8;
+  --white: #ffffff;
+  --text: #1a1e2a;
+  --text-muted: #6a7080;
+  --border: #d0d8e4;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-body); color: #fff; line-height: 1.7; background: #0a1e3d; }
+
+.topbar {
+  background: var(--green-dark);
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar .brand {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+.topbar nav { display: flex; gap: 24px; }
+.topbar nav a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.topbar nav a:hover { color: #fff; }
+.topbar nav a.active { color: var(--gold); }
+
+.page-header {
+  background: transparent;
+  padding: 80px 40px 60px;
+  text-align: center;
+}
+.page-header .ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  opacity: 0.35;
+}
+.page-header .ornament .line { width: 40px; height: 1px; background: var(--gold); }
+.page-header .ornament .diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); }
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 8px;
+  position: relative;
+}
+.page-header p {
+  color: rgba(255,255,255,0.5);
+  font-size: 15px;
+  position: relative;
+}
+
+.content {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 60px 40px 120px;
+}
+
+.contact-card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.contact-card .icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #e8f5f1, #d0ebe5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 24px;
+}
+
+.contact-card h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.contact-card p {
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  margin-bottom: 32px;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.contact-form label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: -8px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.2s;
+  background: rgba(10,30,61,0.8); color: #fff;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--green);
+}
+
+.contact-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.contact-form button {
+  padding: 14px 24px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 8px;
+}
+
+.contact-form button:hover { background: var(--green-dark); }
+
+.footer {
+  padding: 32px 40px 72px;
+  text-align: center;
+  font-size: 12px;
+  color: #b5b0a8;
+}
+
+@media (max-width: 700px) {
+  .topbar { padding: 14px 20px; }
+  .topbar nav { gap: 16px; }
+  .page-header { padding: 60px 20px 48px; }
+  .content { padding: 40px 20px 80px; }
+  .contact-card { padding: 36px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="brand">Aroha Te Ao</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="resources.html">Resources</a>
+    <a href="contact.html" class="active">Contact</a>
+  </nav>
+</div>
+
+<div class="page-header">
+  <div class="ornament"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <h1>Contact Us</h1>
+  <p>We'd love to hear from you</p>
+</div>
+
+<div class="content">
+  <div class="contact-card">
+    <div class="icon">✉️</div>
+    <h2>Get in Touch</h2>
+    <p>Have a question, suggestion, or just want to say hello? Drop us a message below.</p>
+    <form class="contact-form" id="contactForm">
+      <label>Name</label>
+      <input type="text" id="msgName" placeholder="Your name" required>
+      <label>Email</label>
+      <input type="email" id="msgEmail" placeholder="your@email.com" required>
+      <label>Message</label>
+      <textarea id="msgBody" placeholder="What's on your mind?" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</div>
+
+<footer class="footer">
+  &copy; 2026 Aroha Te Ao. All rights reserved.
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyCaUabmvdt1UEzxbTRprs1VsvxXju2A_sg",
+  authDomain: "aroha-te-ao.firebaseapp.com",
+  projectId: "aroha-te-ao",
+  storageBucket: "aroha-te-ao.firebasestorage.app",
+  messagingSenderId: "222775558795",
+  appId: "1:222775558795:web:f8ba238ce96405d35e0a8e"
+};
+var db;
+try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { db = null; }
+
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var name = document.getElementById('msgName').value.trim();
+  var email = document.getElementById('msgEmail').value.trim();
+  var body = document.getElementById('msgBody').value.trim();
+  if (!name || !email || !body) return;
+
+  if (db) {
+    try {
+      var doc = await db.collection('app').doc('inbox').get();
+      var messages = doc.exists ? (doc.data().messages || []) : [];
+      messages.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,8),
+        name: name,
+        email: email,
+        body: body,
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+      await db.collection('app').doc('inbox').set({ messages: messages });
+    } catch(err) { console.warn('Send failed:', err); }
+  }
+
+  this.innerHTML = '<p style="text-align:center;color:#3d8b37;font-weight:600;padding:40px 0">Thanks for your message! We will get back to you soon.</p>';
+});
+</script>
+<script src="kaitiaki-widget.js"></script>
+</body>
+</html>

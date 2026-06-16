@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Aroha Te Ao — Manage</title>
+<style>
+:root {
+  --green: #1a3f6b; --green-dark: #0a1e3d; --gold: #c8a94e; --cream: #edf2f8;
+  --white: #ffffff; --text: #1a1e2a; --text-muted: #6a7080; --border: #d0d8e4;
+  --red: #c44536; --red-light: #fce8e6; --green-light: #e6f4e5;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font-body); color:#fff; line-height:1.6; background:#0a1e3d; }
+.topbar { background:var(--green-dark); padding:16px 40px; display:flex; align-items:center; justify-content:space-between; }
+.topbar .brand { font-family:var(--font-display); font-size:18px; font-weight:700; color:#fff; text-decoration:none; }
+.topbar nav { display:flex; gap:24px; }
+.topbar nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:13px; font-weight:500; transition:color 0.2s; }
+.topbar nav a:hover { color:#fff; }
+.topbar nav a.active { color:var(--gold); }
+.page-header {
+  background:transparent;
+  padding:80px 40px 60px; text-align:center; position:relative; overflow:hidden;
+}
+
+.page-header .ornament { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:20px; opacity:0.35; }
+.page-header .ornament .line { width:40px; height:1px; background:var(--gold); }
+.page-header .ornament .diamond { width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+.page-header h1 { font-family:var(--font-display); font-size:40px; color:#fff; font-weight:700; margin-bottom:8px; position:relative; }
+.page-header p { color:rgba(255,255,255,0.5); font-size:15px; position:relative; }
+
+.content { max-width:100%; margin:0 auto; padding:60px 40px 120px; }
+
+/* AUTH GATE */
+#authGate { text-align:center; padding:60px 20px; }
+#authGate h2 { font-family:var(--font-display); font-size:24px; color:#fff; margin-bottom:8px; }
+#authGate p { color:rgba(255,255,255,0.6); font-size:14px; margin-bottom:24px; }
+#authGate input { width:240px; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; text-align:center; outline:none; background:rgba(10,30,61,0.8);color:#fff; font-family:var(--font-body); display:block; margin:0 auto 8px; }
+#authGate input:focus { border-color:var(--green); }
+#authGate button { margin-top:12px; padding:10px 32px; background:var(--gold); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+#authGate .err { color:var(--red); font-size:12px; margin-top:8px; min-height:18px; }
+
+/* DASHBOARD */
+#dashboard { display:none; }
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+.dash-stat { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:20px; text-align:center; }
+.dash-stat .num { font-family:var(--font-display); font-size:32px; font-weight:700; color:#fff; }
+.dash-stat .lbl { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.5); margin-top:2px; }
+
+.section { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:12px; margin-bottom:24px; overflow:hidden; }
+.section-head { padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:space-between; }
+.section-head h2 { font-family:var(--font-display); font-size:18px; color:#fff; }
+.section-head .badge { background:var(--gold); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; }
+.section-body { padding:16px 24px; }
+.section-body.empty { text-align:center; padding:40px 24px; color:rgba(255,255,255,0.5); font-size:14px; }
+
+.pending-item { border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:16px; margin-bottom:10px; }
+.pending-item:last-child { margin-bottom:0; }
+.pending-item .pi-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.pending-item .pi-name { font-weight:600; font-size:15px; color:#fff; }
+.pending-item .pi-time { font-size:11px; color:rgba(255,255,255,0.5); }
+.pending-item .pi-detail { font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:12px; }
+.pending-item .pi-actions { display:flex; gap:8px; }
+
+.btn { padding:8px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; }
+.btn-approve { background:var(--green-light); color:#3d8b37; }
+.btn-approve:hover { background:#d0eacd; }
+.btn-reject { background:var(--red-light); color:var(--red); }
+.btn-reject:hover { background:#f5cbc6; }
+.btn-primary { background:var(--green); color:#fff; }
+.btn-primary:hover { background:var(--green-dark); }
+.btn-ghost { background:transparent; color:rgba(255,255,255,0.5); border:1px solid var(--border); }
+.btn-ghost:hover { background:#e4e9f0; }
+.btn-gold { background:var(--gold); color:#fff; }
+.btn-gold:hover { background:#d4b65a; }
+.btn-sm { padding:6px 12px; font-size:11px; }
+.btn-danger { background:var(--red-light); color:var(--red); }
+.btn-danger:hover { background:#f5cbc6; }
+
+/* TEMPLATE EDITOR */
+.tmpl-item { display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.08); gap:12px; }
+.tmpl-item:last-child { border-bottom:none; }
+.tmpl-item .tmpl-name { flex:1; font-weight:600; font-size:14px; }
+.tmpl-item .tmpl-meta { font-size:12px; color:rgba(255,255,255,0.5); margin-right:8px; }
+.tmpl-item .tmpl-actions { display:flex; gap:6px; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:rgba(10,30,61,0.8);color:#fff; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.2); width:90%; max-width:600px; max-height:80vh; overflow-y:auto; }
+.modal-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-header h3 { font-family:var(--font-display); font-size:18px; }
+.modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:rgba(255,255,255,0.5); }
+.modal-body { padding:20px 24px; }
+.modal-body label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:rgba(255,255,255,0.5); margin-bottom:4px; margin-top:16px; }
+.modal-body label:first-of-type { margin-top:0; }
+.modal-body input, .modal-body select { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; font-size:13px; outline:none; font-family:var(--font-body); background:rgba(10,30,61,0.8);color:#fff; }
+.modal-body input:focus { border-color:var(--green); }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+
+.std-edit-row { display:grid; grid-template-columns:90px 1fr 60px 90px 30px; gap:6px; align-items:center; margin-bottom:6px; }
+.std-edit-row input, .std-edit-row select { padding:6px 8px; font-size:12px; }
+.std-edit-row .rm { background:none; border:none; color:var(--red); font-size:16px; cursor:pointer; }
+
+.footer { padding:32px 40px 72px; text-align:center; font-size:12px; color:#b5b0a8; }
+@media (max-width:700px) {
+  .topbar { padding:14px 20px; } .topbar nav { gap:16px; }
+  .page-header { padding:60px 20px 48px; } .content { padding:40px 20px 80px; }
+  .dash-stats { grid-template-columns:1fr; }
+  .std-edit-row { grid-template-columns:70px 1fr 50px 70px 24px; gap:4px; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="brand">Aroha Te Ao</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="submit.html">Submit</a>
+    <a href="manage.html" class="active">Manage</a>
+  </nav>
+</div>
+<div class="page-header">
+  <div class="ornament"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <h1>Manage</h1>
+  <p>Admin dashboard for Aroha Te Ao</p>
+</div>
+<div class="content">
+  <div id="authGate">
+    <h2>Admin Access Required</h2>
+    <p>Enter your username and passcode to access the dashboard.</p>
+    <input type="text" id="authUser" placeholder="Username" style="margin-bottom:8px">
+    <input type="password" id="authInput" placeholder="Passcode">
+    <br><button id="authBtn">Unlock</button>
+    <div class="err" id="authErr">&nbsp;</div>
+  </div>
+
+  <div id="dashboard">
+    <div class="dash-stats">
+      <div class="dash-stat"><div class="num" id="statEnrol">0</div><div class="lbl">Pending Enrolments</div></div>
+      <div class="dash-stat"><div class="num" id="statSubj">0</div><div class="lbl">Pending Subjects</div></div>
+      <div class="dash-stat"><div class="num" id="statTmpl">0</div><div class="lbl">Subject Templates</div></div>
+      <div class="dash-stat"><div class="num" id="statInbox">0</div><div class="lbl">Messages</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Pending Enrolments</h2><span class="badge" id="enrolBadge">0</span></div>
+      <div class="section-body" id="enrolList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Pending Subject Suggestions</h2><span class="badge" id="subjBadge">0</span></div>
+      <div class="section-body" id="subjList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Pending Results</h2><span class="badge" id="resultsBadge">0</span></div>
+      <div class="section-body" id="resultsList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>Subject Templates</h2>
+        <button class="btn btn-primary btn-sm" id="btnNewTemplate">+ New Subject</button>
+      </div>
+      <div class="section-body" id="tmplList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Inbox</h2><span class="badge" id="inboxBadge">0</span></div>
+      <div class="section-body" id="inboxList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Admin Chat</h2></div>
+      <div class="section-body" style="padding:0">
+        <div id="chatMessages" style="height:300px;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
+        <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px">
+          <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;font-family:var(--font-body)">
+          <button id="chatSend" class="btn btn-primary" style="padding:10px 20px">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modalTitle"></h3><button class="modal-close" id="modalClose">&times;</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<footer class="footer">&copy; 2026 Aroha Te Ao. All rights reserved.</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCaUabmvdt1UEzxbTRprs1VsvxXju2A_sg",
+  authDomain: "aroha-te-ao.firebaseapp.com",
+  projectId: "aroha-te-ao",
+  storageBucket: "aroha-te-ao.firebasestorage.app",
+  messagingSenderId: "222775558795",
+  appId: "1:222775558795:web:f8ba238ce96405d35e0a8e"
+};
+let db;
+try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { db = null; }
+
+const PASSCODE = '183.hq';
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function fmtDate(iso) { try { const d=new Date(iso); return d.toLocaleDateString('en-NZ',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); } catch(e) { return ''; } }
+
+// Firestore helpers
+async function getTemplates() { try { const d=await db.collection('app').doc('templates').get(); return d.exists?(d.data().templates||{}):{}; } catch(e) { return {}; } }
+async function saveTemplates(t) { await db.collection('app').doc('templates').set({templates:t}); }
+async function getEnrolments() { try { const d=await db.collection('app').doc('pendingEnrollments').get(); return d.exists?(d.data().items||[]):[];} catch(e){return[];} }
+async function saveEnrolments(items) { await db.collection('app').doc('pendingEnrollments').set({items}); }
+async function getSubjects() { try { const d=await db.collection('app').doc('pendingSubjects').get(); return d.exists?(d.data().items||[]):[];} catch(e){return[];} }
+async function saveSubjects(items) { await db.collection('app').doc('pendingSubjects').set({items}); }
+async function getTrackerData() { try { const d=await db.collection('app').doc('tracker').get(); return d.exists?d.data():{students:[]};} catch(e){return {students:[]};} }
+async function saveTrackerData(data) { await db.collection('app').doc('tracker').set(data); }
+
+// ADMIN USERS
+var ADMIN_USERS = {
+  'epapaletoa': 'Eden',
+  'jshiju': 'Johan',
+  'adevine': 'Anthony',
+  'lhenry': 'Luke'
+};
+var currentAdmin = '';
+var currentAdminDisplay = '';
+
+// AUTH
+document.getElementById('authBtn').addEventListener('click', tryAuth);
+document.getElementById('authInput').addEventListener('keydown', e => { if(e.key==='Enter') tryAuth(); });
+document.getElementById('authUser').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('authInput').focus(); });
+function tryAuth() {
+  var username = document.getElementById('authUser').value.trim().toLowerCase();
+  var pass = document.getElementById('authInput').value;
+  if (!ADMIN_USERS[username]) {
+    document.getElementById('authErr').textContent='Unknown username';
+    document.getElementById('authUser').focus();
+    return;
+  }
+  if (pass !== PASSCODE) {
+    document.getElementById('authErr').textContent='Incorrect passcode';
+    document.getElementById('authInput').value='';
+    return;
+  }
+  currentAdmin = username;
+  currentAdminDisplay = ADMIN_USERS[username];
+  document.getElementById('authGate').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  renderAll();
+  initChat();
+}
+
+// RENDER
+async function renderAll() {
+  await renderEnrolments();
+  await renderSubjects();
+  await renderResults();
+  await renderTemplates();
+  await renderInbox();
+  const e=await getEnrolments(), s=await getSubjects(), t=await getTemplates();
+  const r=await getPendingResults();
+  document.getElementById('statEnrol').textContent=e.length;
+  document.getElementById('statSubj').textContent=s.length;
+  document.getElementById('statTmpl').textContent=Object.keys(t).length;
+  document.getElementById('enrolBadge').textContent=e.length;
+  document.getElementById('subjBadge').textContent=s.length;
+  document.getElementById('resultsBadge').textContent=r.length;
+}
+
+async function renderEnrolments() {
+  const list=document.getElementById('enrolList');
+  const items=await getEnrolments();
+  if (!items.length) { list.innerHTML='<div class="empty">No pending enrolments.</div>'; list.className='section-body empty'; return; }
+  list.className='section-body';
+  list.innerHTML=items.map(item => `
+    <div class="pending-item">
+      <div class="pi-head"><span class="pi-name">${esc(item.studentName)}</span><span class="pi-time">${fmtDate(item.timestamp)}</span></div>
+      <div class="pi-detail">${item.subjects.map(s=>'<span style="display:inline-block;padding:2px 8px;background:rgba(10,30,61,0.8);color:#fff;border-radius:4px;font-size:12px;margin:2px">'+esc(s)+'</span>').join(' ')}</div>
+      <div class="pi-actions">
+        <button class="btn btn-approve btn-sm" onclick="approveEnrolment('${item.id}')">✓ Apply</button>
+        <button class="btn btn-reject btn-sm" onclick="rejectEnrolment('${item.id}')">✕ Dismiss</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function approveEnrolment(id) {
+  const items=await getEnrolments();
+  const item=items.find(i=>i.id===id);
+  if (!item) return;
+  const templates=await getTemplates();
+  const tracker=await getTrackerData();
+  const student = { id:uid(), name:item.studentName, subjects:[] };
+  const preGrades = item.grades || {};
+  const preStatuses = item.statuses || {};
+  item.subjects.forEach(subjName => {
+    if (templates[subjName]) {
+      const subjGrades = preGrades[subjName] || {};
+      const subjStatuses = preStatuses[subjName] || {};
+      student.subjects.push({
+        id: uid(), templateKey: subjName, name: subjName,
+        standards: templates[subjName].map((t, idx) => {
+          const grade = subjGrades[idx] || null;
+          let status = 'not-started';
+          if (subjStatuses[idx] === 'derived') status = 'derived';
+          else if (grade === 'na') status = 'failed';
+          else if (grade) status = 'received';
+          return { code:t.code, name:t.name, credits:t.credits, type:t.type||'', grade:grade, status:status };
+        })
+      });
+    }
+  });
+  tracker.students = tracker.students || [];
+  tracker.students.push(student);
+  await saveTrackerData(tracker);
+  await saveEnrolments(items.filter(i=>i.id!==id));
+  renderAll();
+}
+
+async function rejectEnrolment(id) {
+  const items=await getEnrolments();
+  await saveEnrolments(items.filter(i=>i.id!==id));
+  renderAll();
+}
+
+async function renderSubjects() {
+  const list=document.getElementById('subjList');
+  const items=await getSubjects();
+  if (!items.length) { list.innerHTML='<div class="empty">No pending subject suggestions.</div>'; list.className='section-body empty'; return; }
+  list.className='section-body';
+  list.innerHTML=items.map(item => `
+    <div class="pending-item">
+      <div class="pi-head"><span class="pi-name">${esc(item.name)}</span><span class="pi-time">by ${esc(item.submittedBy)} · ${fmtDate(item.timestamp)}</span></div>
+      <div class="pi-detail">${item.standards.length} standard${item.standards.length!==1?'s':''} · ${item.standards.reduce((n,s)=>n+s.credits,0)} total credits</div>
+      <div class="pi-actions">
+        <button class="btn btn-approve btn-sm" onclick="approveSubject('${item.id}')">✓ Add to Templates</button>
+        <button class="btn btn-ghost btn-sm" onclick="previewSubject('${item.id}')">Preview</button>
+        <button class="btn btn-reject btn-sm" onclick="rejectSubject('${item.id}')">✕ Dismiss</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function approveSubject(id) {
+  const items=await getSubjects();
+  const item=items.find(i=>i.id===id);
+  if (!item) return;
+  const templates=await getTemplates();
+  templates[item.name] = item.standards;
+  await saveTemplates(templates);
+  await saveSubjects(items.filter(i=>i.id!==id));
+  renderAll();
+}
+
+async function previewSubject(id) {
+  const items=await getSubjects();
+  const item=items.find(i=>i.id===id);
+  if (!item) return;
+  openModal('Preview: '+item.name,
+    '<table style="width:100%;border-collapse:collapse;font-size:13px">'+
+    '<tr style="text-align:left"><th style="padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5)">Code</th><th style="padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5)">Name</th><th style="padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5)">Cr</th><th style="padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5)">Type</th></tr>'+
+    item.standards.map(s=>'<tr><td style="padding:6px 0;border-bottom:1px solid #e4e9f0;font-weight:600;color:var(--green)">'+esc(s.code)+'</td><td style="padding:6px 0;border-bottom:1px solid #e4e9f0">'+esc(s.name)+'</td><td style="padding:6px 0;border-bottom:1px solid #e4e9f0;text-align:center">'+s.credits+'</td><td style="padding:6px 0;border-bottom:1px solid #e4e9f0;font-size:12px;color:rgba(255,255,255,0.5)">'+esc(s.type)+'</td></tr>').join('')+
+    '</table>',
+    '<button class="btn btn-ghost" onclick="closeModal()">Close</button>');
+}
+
+async function rejectSubject(id) {
+  const items=await getSubjects();
+  await saveSubjects(items.filter(i=>i.id!==id));
+  renderAll();
+}
+
+// PENDING RESULTS
+async function getPendingResults() { try { var d=await db.collection('app').doc('pendingResults').get(); return d.exists?(d.data().items||[]):[];} catch(e){return[];} }
+async function savePendingResults(items) { await db.collection('app').doc('pendingResults').set({items}); }
+
+async function renderResults() {
+  var list=document.getElementById('resultsList');
+  var items=await getPendingResults();
+  if (!items.length) { list.innerHTML='<div class="empty">No pending results.</div>'; list.className='section-body empty'; return; }
+  list.className='section-body';
+  var gradeLabels = {na:'NA',a:'A',m:'M',e:'E'};
+  list.innerHTML=items.map(function(item){
+    var resultsList = item.results.map(function(r){
+      return '<span style="display:inline-block;padding:2px 8px;background:rgba(255,255,255,0.08);border-radius:4px;font-size:11px;margin:2px">' + esc(r.code) + ': <strong>' + (gradeLabels[r.grade]||r.grade) + '</strong></span>';
+    }).join(' ');
+    return '<div class="pending-item">' +
+      '<div class="pi-head"><span class="pi-name">' + esc(item.studentName) + '</span><span class="pi-time">' + fmtDate(item.timestamp) + '</span></div>' +
+      '<div class="pi-detail">' + resultsList + '</div>' +
+      '<div class="pi-actions">' +
+      '<button class="btn btn-approve btn-sm" onclick="approveResults(\'' + item.id + '\')">✓ Apply Results</button>' +
+      '<button class="btn btn-reject btn-sm" onclick="rejectResults(\'' + item.id + '\')">✕ Dismiss</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+async function approveResults(id) {
+  var items=await getPendingResults();
+  var item=items.find(function(i){return i.id===id;});
+  if (!item) return;
+  var tracker=await getTrackerData();
+  var student=tracker.students.find(function(s){return s.name.toLowerCase()===item.studentName.toLowerCase();});
+  if (!student) { alert('Student "' + item.studentName + '" not found in tracker. Check the name matches.'); return; }
+  item.results.forEach(function(r) {
+    student.subjects.forEach(function(subj) {
+      subj.standards.forEach(function(std) {
+        if (std.code.replace(/\D/g,'') === r.code.replace(/\D/g,'')) {
+          std.grade = r.grade;
+          if (r.derived) std.status = 'derived';
+          else if (r.grade && r.grade !== 'na') std.status = 'received';
+          else if (r.grade === 'na') std.status = 'failed';
+        }
+      });
+    });
+  });
+  await saveTrackerData(tracker);
+  await savePendingResults(items.filter(function(i){return i.id!==id;}));
+  renderAll();
+}
+
+async function rejectResults(id) {
+  var items=await getPendingResults();
+  await savePendingResults(items.filter(function(i){return i.id!==id;}));
+  renderAll();
+}
+
+async function renderTemplates() {
+  const list=document.getElementById('tmplList');
+  const templates=await getTemplates();
+  const names=Object.keys(templates).sort();
+  if (!names.length) { list.innerHTML='<div class="empty">No subject templates configured.</div>'; list.className='section-body empty'; return; }
+  list.className='section-body';
+  list.innerHTML=names.map(name => {
+    const stds=templates[name];
+    return `<div class="tmpl-item">
+      <span class="tmpl-name">${esc(name)}</span>
+      <span class="tmpl-meta">${stds.length} standards · ${stds.reduce((n,s)=>n+s.credits,0)}cr</span>
+      <div class="tmpl-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editTemplate('${esc(name).replace(/'/g,"\\'")}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${esc(name).replace(/'/g,"\\'")}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteTemplate(name) {
+  if (!confirm('Delete "'+name+'"? This cannot be undone.')) return;
+  const t=await getTemplates();
+  delete t[name];
+  await saveTemplates(t);
+  renderAll();
+}
+
+// TEMPLATE EDITOR MODAL
+function buildStdEditor(standards) {
+  let html='<div id="editorStds">';
+  html+='<div style="display:grid;grid-template-columns:90px 1fr 60px 90px 30px;gap:6px;margin-bottom:6px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);font-weight:600"><span>Code</span><span>Name</span><span>Credits</span><span>Type</span><span></span></div>';
+  standards.forEach((s,i) => {
+    html+=`<div class="std-edit-row" data-idx="${i}">
+      <input type="text" value="${esc(s.code)}">
+      <input type="text" value="${esc(s.name)}">
+      <input type="number" value="${s.credits}" min="1" max="20" style="text-align:center">
+      <select>${['Internal','External'].map(t=>'<option'+(s.type===t?' selected':'')+'>'+t+'</option>').join('')}</select>
+      <button class="rm" onclick="this.parentElement.remove()">&times;</button>
+    </div>`;
+  });
+  html+='</div>';
+  html+='<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addEditorRow()">+ Add Standard</button>';
+  return html;
+}
+
+function addEditorRow() {
+  const container=document.getElementById('editorStds');
+  const row=document.createElement('div');
+  row.className='std-edit-row';
+  row.innerHTML='<input type="text" placeholder="AS91XXX"><input type="text" placeholder="Standard name"><input type="number" placeholder="0" min="1" max="20" style="text-align:center"><select><option>Internal</option><option>External</option></select><button class="rm" onclick="this.parentElement.remove()">&times;</button>';
+  container.appendChild(row);
+}
+
+function readEditorStds() {
+  const rows=document.querySelectorAll('#editorStds .std-edit-row');
+  const stds=[];
+  rows.forEach(row => {
+    const inputs=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    const code=inputs[0].value.trim(), name=inputs[1].value.trim(), credits=parseInt(inputs[2].value)||0;
+    if (code&&name&&credits>0) stds.push({code,name,credits,type:sel.value});
+  });
+  return stds;
+}
+
+async function editTemplate(name) {
+  const templates=await getTemplates();
+  const stds=templates[name]||[];
+  openModal('Edit: '+name,
+    '<label>Subject Name</label><input type="text" id="editTmplName" value="'+esc(name)+'">'+
+    '<label style="margin-top:16px">Standards</label>'+buildStdEditor(stds),
+    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="btnSaveTemplate">Save Changes</button>');
+  document.getElementById('btnSaveTemplate').addEventListener('click', async function(){
+    const newName=document.getElementById('editTmplName').value.trim();
+    if(!newName) return;
+    const newStds=readEditorStds();
+    if(!newStds.length) return;
+    const t=await getTemplates();
+    if(newName!==name) delete t[name];
+    t[newName]=newStds;
+    await saveTemplates(t);
+    closeModal();
+    renderAll();
+  });
+}
+
+document.getElementById('btnNewTemplate').addEventListener('click', function(){
+  openModal('New Subject',
+    '<label>Subject Name</label><input type="text" id="editTmplName" placeholder="e.g. Art Level 2">'+
+    '<label style="margin-top:16px">Standards</label>'+buildStdEditor([{code:'',name:'',credits:4,type:'Internal'}]),
+    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="btnSaveTemplate">Create Subject</button>');
+  document.getElementById('btnSaveTemplate').addEventListener('click', async function(){
+    const name=document.getElementById('editTmplName').value.trim();
+    if(!name) return;
+    const stds=readEditorStds();
+    if(!stds.length) return;
+    const t=await getTemplates();
+    t[name]=stds;
+    await saveTemplates(t);
+    closeModal();
+    renderAll();
+  });
+});
+
+// MODAL
+function openModal(title,body,footer) {
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalFooter').innerHTML=footer||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.target===document.getElementById('modalOverlay'))closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeModal(); });
+
+// INBOX
+async function getInbox() { try { var d=await db.collection('app').doc('inbox').get(); return d.exists?(d.data().messages||[]):[];} catch(e){return[];} }
+async function saveInbox(messages) { await db.collection('app').doc('inbox').set({messages:messages}); }
+
+async function renderInbox() {
+  var list=document.getElementById('inboxList');
+  var messages=await getInbox();
+  document.getElementById('statInbox').textContent=messages.length;
+  document.getElementById('inboxBadge').textContent=messages.filter(function(m){return !m.read;}).length;
+  if (!messages.length) { list.innerHTML='<div class="empty">No messages yet.</div>'; list.className='section-body empty'; return; }
+  list.className='section-body';
+  messages.sort(function(a,b){ return new Date(b.timestamp)-new Date(a.timestamp); });
+  list.innerHTML=messages.map(function(msg){
+    var unread = !msg.read ? ' style="border-left:3px solid var(--gold)"' : '';
+    return '<div class="pending-item"' + unread + '>' +
+      '<div class="pi-head"><span class="pi-name">' + esc(msg.name) + ' <span style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.5)">&lt;' + esc(msg.email) + '&gt;</span></span><span class="pi-time">' + fmtDate(msg.timestamp) + '</span></div>' +
+      '<div class="pi-detail" style="white-space:pre-wrap;font-size:13px;color:var(--text)">' + esc(msg.body) + '</div>' +
+      '<div class="pi-actions">' +
+      (!msg.read ? '<button class="btn btn-approve btn-sm" onclick="markRead(\'' + msg.id + '\')">Mark Read</button>' : '<span style="font-size:11px;color:rgba(255,255,255,0.5)">Read</span>') +
+      '<button class="btn btn-reject btn-sm" onclick="deleteMessage(\'' + msg.id + '\')">Delete</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+async function markRead(id) {
+  var messages=await getInbox();
+  var msg=messages.find(function(m){return m.id===id;});
+  if (msg) { msg.read=true; await saveInbox(messages); renderInbox(); }
+}
+
+async function deleteMessage(id) {
+  var messages=await getInbox();
+  await saveInbox(messages.filter(function(m){return m.id!==id;}));
+  renderInbox();
+}
+
+// ADMIN CHAT
+var THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+
+function initChat() {
+  if (!db) return;
+
+  // Real-time listener for chat
+  db.collection('app').doc('chat').onSnapshot(function(doc) {
+    if (doc.exists) {
+      var messages = doc.data().messages || [];
+      renderChat(messages);
+    } else {
+      renderChat([]);
+    }
+  });
+
+  // Send message
+  document.getElementById('chatSend').addEventListener('click', sendChat);
+  document.getElementById('chatInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendChat();
+  });
+}
+
+function renderChat(messages) {
+  var container = document.getElementById('chatMessages');
+  var now = Date.now();
+
+  // Filter out messages older than 3 days
+  var recent = messages.filter(function(m) {
+    return (now - new Date(m.timestamp).getTime()) < THREE_DAYS;
+  });
+
+  if (recent.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.5);font-size:13px;padding:40px 0">No messages yet. Say hello!</p>';
+    return;
+  }
+
+  container.innerHTML = recent.map(function(msg) {
+    var isMe = msg.user === currentAdmin;
+    var align = isMe ? 'flex-end' : 'flex-start';
+    var bg = isMe ? 'var(--green)' : 'var(--white)';
+    var color = isMe ? '#fff' : 'var(--text)';
+    var border = isMe ? 'none' : '1px solid var(--border)';
+    var time = '';
+    try { time = new Date(msg.timestamp).toLocaleTimeString('en-NZ', {hour:'2-digit',minute:'2-digit'}); } catch(e){}
+
+    return '<div style="display:flex;flex-direction:column;align-items:' + align + '">' +
+      '<div style="max-width:75%;padding:10px 14px;border-radius:12px;background:' + bg + ';color:' + color + ';border:' + border + ';font-size:13px;line-height:1.5">' +
+      '<div style="font-size:11px;font-weight:600;margin-bottom:2px;opacity:0.7">' + esc(msg.displayName) + '</div>' +
+      esc(msg.body) +
+      '</div>' +
+      '<span style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;padding:0 4px">' + time + '</span>' +
+      '</div>';
+  }).join('');
+
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChat() {
+  var input = document.getElementById('chatInput');
+  var body = input.value.trim();
+  if (!body || !currentAdmin) return;
+
+  input.value = '';
+  var now = Date.now();
+
+  try {
+    var doc = await db.collection('app').doc('chat').get();
+    var messages = doc.exists ? (doc.data().messages || []) : [];
+
+    // Remove messages older than 3 days
+    messages = messages.filter(function(m) {
+      return (now - new Date(m.timestamp).getTime()) < THREE_DAYS;
+    });
+
+    messages.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      user: currentAdmin,
+      displayName: currentAdminDisplay,
+      body: body,
+      timestamp: new Date().toISOString()
+    });
+
+    await db.collection('app').doc('chat').set({ messages: messages });
+  } catch(e) { console.warn('Chat send failed:', e); }
+}
+</script>
+</body>
+</html>

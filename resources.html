@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Aroha Te Ao — NCEA Resources</title>
+<style>
+:root {
+  --green: #1a3f6b;
+  --green-dark: #0a1e3d;
+  --gold: #c8a94e;
+  --cream: #edf2f8;
+  --white: #ffffff;
+  --text: #1a1e2a;
+  --text-muted: #6a7080;
+  --border: #d0d8e4;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-body); color: #fff; line-height: 1.7; background: #0a1e3d; }
+
+.topbar {
+  background: var(--green-dark);
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar .brand {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+.topbar nav { display: flex; gap: 24px; }
+.topbar nav a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.topbar nav a:hover { color: #fff; }
+.topbar nav a.active { color: var(--gold); }
+
+.page-header {
+  background: transparent;
+  padding: 80px 40px 60px;
+  text-align: center;
+}
+.page-header .ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  opacity: 0.35;
+}
+.page-header .ornament .line { width: 40px; height: 1px; background: var(--gold); }
+.page-header .ornament .diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); }
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 8px;
+  position: relative;
+}
+.page-header p {
+  color: rgba(255,255,255,0.5);
+  font-size: 15px;
+  position: relative;
+}
+
+.content {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 60px 40px 120px;
+}
+
+.resource-group {
+  margin-bottom: 40px;
+}
+
+.resource-group h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(255,255,255,0.15);
+}
+
+.resource-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resource-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.85);
+  transition: all 0.2s;
+}
+
+.resource-link:hover {
+  border-color: var(--green);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(26,92,83,0.06);
+}
+
+.resource-link .r-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.resource-link .r-info { flex: 1; }
+
+.resource-link .r-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+.resource-link .r-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+.resource-link .r-arrow {
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+
+.resource-link:hover .r-arrow { transform: translateX(3px); color: var(--green); }
+
+.gpa-ref {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gpa-ref table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gpa-ref th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-weight: 600;
+}
+
+.gpa-ref td {
+  padding: 12px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.gpa-ref tr:last-child td { border-bottom: none; }
+
+.gpa-ref .grade-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gpa-ref .g-na { background: #fce8e6; color: #c44536; }
+.gpa-ref .g-a { background: #e6f4e5; color: #3d8b37; }
+.gpa-ref .g-m { background: #e3edf8; color: #2c6fba; }
+.gpa-ref .g-e { background: #faf3dd; color: #b8860b; }
+
+.footer {
+  padding: 32px 40px 72px;
+  text-align: center;
+  font-size: 12px;
+  color: #b5b0a8;
+}
+
+@media (max-width: 700px) {
+  .topbar { padding: 14px 20px; }
+  .topbar nav { gap: 16px; }
+  .page-header { padding: 60px 20px 48px; }
+  .content { padding: 40px 20px 80px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="brand">Aroha Te Ao</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="resources.html" class="active">Resources</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</div>
+
+<div class="page-header">
+  <div class="ornament"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <h1>NCEA Resources</h1>
+  <p>Useful links and reference materials</p>
+</div>
+
+<div class="content">
+
+  <div class="resource-group">
+    <h2>GPA Reference</h2>
+    <div class="gpa-ref">
+      <table>
+        <thead><tr><th>Grade</th><th>Meaning</th><th>GPA Points</th></tr></thead>
+        <tbody>
+          <tr><td><span class="grade-pill g-e">E</span></td><td>Excellence</td><td><strong>4</strong></td></tr>
+          <tr><td><span class="grade-pill g-m">M</span></td><td>Merit</td><td><strong>3</strong></td></tr>
+          <tr><td><span class="grade-pill g-a">A</span></td><td>Achieved</td><td><strong>2</strong></td></tr>
+          <tr><td><span class="grade-pill g-na">NA</span></td><td>Not Achieved</td><td><strong>0</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="resource-group">
+    <h2>Official NZQA Links</h2>
+    <div class="resource-list">
+      <a href="https://www.nzqa.govt.nz/ncea/" class="resource-link" target="_blank">
+        <div class="r-icon">🏛️</div>
+        <div class="r-info">
+          <div class="r-title">NZQA — NCEA Homepage</div>
+          <div class="r-desc">Official NCEA information from the New Zealand Qualifications Authority</div>
+        </div>
+        <span class="r-arrow">→</span>
+      </a>
+      <a href="https://www.nzqa.govt.nz/ncea/assessment/search.do" class="resource-link" target="_blank">
+        <div class="r-icon">🔍</div>
+        <div class="r-info">
+          <div class="r-title">Search Standards & Assessment</div>
+          <div class="r-desc">Look up any achievement or unit standard by number or subject</div>
+        </div>
+        <span class="r-arrow">→</span>
+      </a>
+      <a href="https://www2.nzqa.govt.nz/qualifications-and-standards/access-your-results/" class="resource-link" target="_blank">
+        <div class="r-icon">📋</div>
+        <div class="r-info">
+          <div class="r-title">Access Your Results</div>
+          <div class="r-desc">Students can check official NCEA results through MyNZQA</div>
+        </div>
+        <span class="r-arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="resource-group">
+    <h2>Study & Support</h2>
+    <div class="resource-list">
+      <a href="https://www.nobraintoosmall.co.nz" class="resource-link" target="_blank">
+        <div class="r-icon">🧠</div>
+        <div class="r-info">
+          <div class="r-title">No Brain Too Small</div>
+          <div class="r-desc">Free NCEA Science study resources — Physics, Chemistry, Biology</div>
+        </div>
+        <span class="r-arrow">→</span>
+      </a>
+      <a href="https://www.studytime.co.nz" class="resource-link" target="_blank">
+        <div class="r-icon">⏰</div>
+        <div class="r-info">
+          <div class="r-title">StudyTime</div>
+          <div class="r-desc">NCEA study guides, practice exams, and walkthrough videos</div>
+        </div>
+        <span class="r-arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  &copy; 2026 Aroha Te Ao. All rights reserved.
+</footer>
+
+<script src="kaitiaki-widget.js"></script>
+</body>
+</html>
